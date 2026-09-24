@@ -227,6 +227,7 @@ export function MapInterface({ debug }: Props) {
 
 function DebugReadout() {
   const point = useMapState((s) => s.debugPoint);
+  const level = useMapState((s) => s.detailLevel);
 
   // C logs the current camera as a region `view`, ready to paste.
   useEffect(() => {
@@ -241,8 +242,9 @@ function DebugReadout() {
 
   return (
     <div className="atlas-debug script-exempt" aria-hidden="true">
-      <p>DEBUG_MAP — click the terrain · C logs the camera</p>
-      <p>{point ? `x ${point[0]}   y ${point[1]}   z ${point[2]}` : 'no point yet'}</p>
+      <p>DEBUG_MAP — click the terrain (Shift: place format) · C logs the camera</p>
+      <p>{point ? `region [${point.join(', ')}]   place [${point[0]}, ${point[2]}]` : 'no point yet'}</p>
+      <p>detail: {level}</p>
     </div>
   );
 }

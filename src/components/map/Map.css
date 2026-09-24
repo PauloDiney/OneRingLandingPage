@@ -178,6 +178,170 @@ html.is-atlas body {
   transform: scale(1.5);
 }
 
+/* ---- Places: the finer layer, revealed by coming closer --------------------- */
+
+/* drei <Html> wrapper: only the button itself may take the pointer. */
+.place-anchor {
+  pointer-events: none;
+}
+
+.place {
+  --line: 0.95rem;
+  --dot: 3px;
+  --rest: 0.8;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  justify-items: center;
+  padding: 0 0.3rem;
+  color: var(--c-bone);
+  /* Bottom-centre on the anchor, so the point stands on the land. */
+  transform: translate(-50%, calc(-100% + 2px));
+  pointer-events: auto;
+  text-shadow: 0 0 0.7rem rgba(5, 5, 5, 0.9);
+  /* Arrives: a fade, a few pixels of rise, a breath of scale. */
+  animation: place-in 0.26s var(--ease-out) backwards;
+  transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out), visibility 0.3s;
+}
+
+/* The local tier speaks a little more quietly still. */
+.place[data-tier='local'] {
+  --line: 0.7rem;
+  --dot: 2.5px;
+  --rest: 0.62;
+}
+
+@keyframes place-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% + 7px)) scale(0.94);
+  }
+}
+
+.place__label {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  padding-bottom: 0.35rem;
+  opacity: var(--rest);
+  transition: opacity 0.35s var(--ease-out), transform 0.45s var(--ease-out);
+}
+
+/* Close neighbours put their names to one side of the hairline. */
+.place[data-label='left'] .place__label {
+  justify-items: end;
+  transform: translateX(calc(-50% + 0.3rem));
+}
+
+.place[data-label='right'] .place__label {
+  justify-items: start;
+  transform: translateX(calc(50% - 0.3rem));
+}
+
+.place__category {
+  max-height: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-ash);
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-out), max-height 0.35s var(--ease-out);
+}
+
+.place__name {
+  font-family: var(--font-label);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-left: 0.2em;
+}
+
+.place[data-tier='regional'] .place__name {
+  font-size: 0.625rem;
+}
+
+.place__line {
+  width: 1px;
+  height: var(--line);
+  background: linear-gradient(to bottom, rgba(232, 231, 227, 0), rgba(232, 231, 227, 0.55));
+  transform-origin: bottom;
+  transition: transform 0.45s var(--ease-out);
+}
+
+.place__dot {
+  width: var(--dot);
+  height: var(--dot);
+  border-radius: 50%;
+  background: var(--c-bone);
+  transition: transform 0.4s var(--ease-out);
+}
+
+@media (hover: hover) {
+  .place:hover .place__label {
+    opacity: 1;
+  }
+
+  .place:hover .place__category {
+    max-height: 1.2em;
+    opacity: 1;
+  }
+
+  .place:hover .place__line {
+    transform: scaleY(1.3);
+  }
+
+  .place:hover .place__dot {
+    transform: scale(1.5);
+  }
+}
+
+.place:focus-visible {
+  outline: none;
+}
+
+.place:focus-visible .place__label {
+  opacity: 1;
+}
+
+.place:focus-visible .place__name {
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+}
+
+.place[data-occluded] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Leaves: fades and sinks back into the terrain before it unmounts. */
+.place[data-leaving] {
+  opacity: 0;
+  transform: translate(-50%, calc(-100% + 5px));
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .place {
+    animation-name: place-fade;
+  }
+
+  .place[data-leaving] {
+    transform: translate(-50%, calc(-100% + 2px));
+  }
+
+  @keyframes place-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
 /* ---- Interface --------------------------------------------------------------- */
 
 .atlas-ui {

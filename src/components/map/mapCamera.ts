@@ -3,6 +3,7 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { gsap } from '../../lib/gsap';
 import { prefersReducedMotion } from '../../lib/media';
 import { LIMITS, MAP_REGIONS, OVERVIEW, type MapView, type RegionId, type Vec3 } from '../../data/mapRegions';
+import { DETAIL, PLACE_VIEW, type MapDetailLevel, type MapPlace } from '../../data/mapPlaces';
 import { mapStore } from './mapStore';
 
 /*
@@ -13,6 +14,11 @@ import { mapStore } from './mapStore';
  *        (orbit, zoom, pan        (controls locked in       (the exact view
  *         within limits)           flight, then a tighter    the reader left)
  *                                  orbit around the region)
+ *
+ * It also watches how close the camera is — on every controls change, which
+ * includes every frame of a flight — and tells the store only when a detail
+ * threshold is crossed (overview ⇄ regional ⇄ local). Nothing per frame
+ * reaches React.
  */
 
 const DEG = Math.PI / 180;
@@ -46,14 +52,20 @@ export function viewPose(view: MapView): Pose {
   return { position, target };
 }
 
+/**
+ * Portrait screens see less land at the same distance (the frame is narrow),
+ * so every framing distance — region views, place views, detail thresholds —
+ * is stretched by the same factor.
+ */
+const portraitScale = () => (aspect < 1 ? Math.min(1.8, Math.pow(1 / aspect, 0.6)) : 1);
+
 export function regionView(id: RegionId): MapView {
   const region = MAP_REGIONS.find((r) => r.id === id)!;
   const view: MapView = { ...region.view, target: region.view.target ?? region.position };
   if (aspect >= 1) return view;
-  // Portrait: a narrow frame sees less land at the same distance, so step
-  // back; and aim a little in front of the region, lifting it clear of the
-  // bottom sheet that carries its text.
-  const distance = view.distance * Math.min(1.8, Math.pow(1 / aspect, 0.6));
+  // Portrait: step back, and aim a little in front of the region, lifting it
+  // clear of the bottom sheet that carries its text.
+  const distance = view.distance * portraitScale();
   const az = view.azimuth * DEG;
   const lift = distance * 0.16;
   const [x, y, z] = view.target;
@@ -130,6 +142,7 @@ function guard() {
     const floor = groundAt(camera.position.x, camera.position.z) + CLEARANCE;
     if (camera.position.y < floor) camera.position.y = floor;
   }
+  trackDetail();
   if (mapStore.get().selected) return;
   const t = rig.controls.target;
   const { x, z } = LIMITS.panBounds;
@@ -142,6 +155,36 @@ function guard() {
     t.x = cx;
     t.z = cz;
   }
+}
+
+/* ── Detail level ─────────────────────────────────────────────────────────── */
+
+/**
+ * Which layer of labels a camera distance calls for. Arriving at a closer
+ * layer happens at its threshold; leaving it takes a little more distance
+ * (hysteresis), so a zoom resting on the edge never flickers.
+ */
+function levelFor(distance: number, current: MapDetailLevel): MapDetailLevel {
+  const k = portraitScale();
+  const local = DETAIL.local * k + (current === 'local' ? DETAIL.hysteresis * k : 0);
+  const regional = DETAIL.regional * k + (current === 'overview' ? 0 : DETAIL.hysteresis * k);
+  if (distance <= local) return 'local';
+  if (distance <= regional) return 'regional';
+  return 'overview';
+}
+
+const snap = (n: number) => Math.round(n * 2) / 2;
+
+/** Cheap: a subtraction, a comparison or two, and a store write only on change. */
+function trackDetail() {
+  if (!rig) return;
+  const { camera, controls } = rig;
+  const state = mapStore.get();
+  const detailLevel = levelFor(camera.position.distanceTo(controls.target), state.detailLevel);
+  // Where the camera looks matters only for free exploration past the overview.
+  const detailFocus =
+    detailLevel !== 'overview' && !state.selected ? `${snap(controls.target.x)},${snap(controls.target.z)}` : state.detailFocus;
+  if (detailLevel !== state.detailLevel || detailFocus !== state.detailFocus) mapStore.set({ detailLevel, detailFocus });
 }
 
 /* ── Flights ──────────────────────────────────────────────────────────────── */
@@ -176,6 +219,7 @@ function fly(to: Pose, done: () => void, opts: { duration?: number; ease?: strin
     onComplete: () => {
       flight = null;
       done();
+      trackDetail();
       controls.enabled = true;
       invalidate();
     },
@@ -201,6 +245,11 @@ export const mapCamera = {
   /** The terrain, for keeping the camera above it. */
   setGround(fn: (x: number, z: number) => number) {
     groundAt = fn;
+  },
+
+  /** Height of the terrain under a point in atlas space, once the model is in. */
+  groundAt(x: number, z: number): number | null {
+    return groundAt ? groundAt(x, z) : null;
   },
 
   /** The overview for the current viewport; also bounds how far one may zoom out. */
@@ -255,6 +304,35 @@ export const mapCamera = {
       focusedLimits(rig!.controls, view);
       mapStore.set({ flying: false });
     }, { duration: 2.8, ease: 'power2.inOut', arc: 0 });
+  },
+
+  /**
+   * A gentle recentre on a place: its own point on the terrain, from about
+   * where the camera already faces. Close enough to enter the local layer.
+   * Within a region it stays in that region (switching to the place's own
+   * region if needed); in free exploration it stays free.
+   */
+  focusPlace(place: MapPlace) {
+    if (!rig || !groundAt) return;
+    const [x, z] = place.position;
+    const { selected } = mapStore.get();
+    const current = this.describe();
+    const k = portraitScale();
+    // Keep facing the way the reader was facing, within what free exploration allows.
+    const facing = current?.azimuth ?? overview.azimuth;
+    const azimuth = place.view?.azimuth ?? (selected ? facing : Math.max(-LIMITS.azimuthRange, Math.min(LIMITS.azimuthRange, facing)));
+    const view: MapView = {
+      target: [x, groundAt(x, z), z],
+      distance: (place.view?.distance ?? PLACE_VIEW.distance) * k,
+      elevation: place.view?.elevation ?? PLACE_VIEW.elevation,
+      azimuth,
+    };
+    mapStore.set({ selected: selected ? place.parentRegion : null, flying: true, hovered: null });
+    fly(viewPose(view), () => {
+      if (mapStore.get().selected) focusedLimits(rig!.controls, view);
+      else freeLimits(rig!.controls);
+      mapStore.set({ flying: false });
+    });
   },
 
   back() {

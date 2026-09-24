@@ -134,7 +134,14 @@ export const MapModel = forwardRef<Group, Props>(function MapModel({ onReady, de
     e.stopPropagation();
     const r = (n: number) => Number(n.toFixed(2));
     const p: Vec3 = [r(e.point.x), r(e.point.y), r(e.point.z)];
-    console.info(`Clicked terrain:\nx: ${p[0]}\ny: ${p[1]}\nz: ${p[2]}\n\nposition: [${p.join(', ')}],`);
+    if (e.nativeEvent.shiftKey) {
+      // Shift+click: only what a place needs (its height comes from the terrain).
+      console.info(`PLACE POSITION\nposition: [${p[0]}, ${p[2]}],`);
+    } else {
+      console.info(
+        `Clicked terrain:\nx: ${p[0]}\ny: ${p[1]}\nz: ${p[2]}\n\nposition: [${p.join(', ')}],\n\nMapPlace position:\n[${p[0]}, ${p[2]}]`,
+      );
+    }
     setMarker(p);
     mapStore.set({ debugPoint: p });
   };

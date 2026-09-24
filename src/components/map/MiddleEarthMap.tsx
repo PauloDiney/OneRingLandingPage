@@ -8,6 +8,7 @@ import { prefersReducedMotion } from '../../lib/media';
 import { MAP_REGIONS } from '../../data/mapRegions';
 import { MapModel, type MapFit } from './MapModel';
 import { MapHotspot } from './MapHotspot';
+import { MapPlaces } from './MapPlaces';
 import { fitOverview, mapCamera } from './mapCamera';
 import { mapStore } from './mapStore';
 
@@ -117,6 +118,8 @@ function Scene({ shadows, debug }: SceneProps) {
         {MAP_REGIONS.map((region) => (
           <MapHotspot key={region.id} region={region} occluder={model} />
         ))}
+        {/* Finer detail, revealed as the camera comes closer. */}
+        <MapPlaces occluder={model} />
       </group>
 
       <OrbitControls
