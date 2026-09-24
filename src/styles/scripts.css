@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Script modes — the whole page in another writing system.
+
+   <html class="script-elvish">    Elvish Ring NFI: each Latin letter drawn
+                                   as a Tengwar-style glyph (film-inspired
+                                   letterforms, not Tengwar orthography).
+   <html class="script-dwarvish">  Moria: each Latin letter drawn as a rune.
+
+   Both are letter-for-letter faces, so the text underneath stays the same
+   English: nothing here translates anything. The mode simply swaps the three
+   type tokens from typography.css, and every text style follows.
+
+   Each face is registered three times, once per role, with `size-adjust`
+   set so it takes about the room of the face it stands in for — the layout
+   stays where it was. `unicode-range` limits every one of them to letters:
+   Elvish Ring draws no digits and Moria draws digits and punctuation as
+   placeholder discs, so numbers, dates and punctuation always fall through
+   to the site's own faces.
+
+   Files load only when a mode is chosen (the provider fetches them before
+   switching). All from /public/fonts — no CDN.
+   ========================================================================== */
+
+/* ---- Elvish ------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Elvish Display';
+  src: url('/fonts/elvish%20ring%20nfi.ttf') format('truetype');
+  unicode-range: U+0041-005A, U+0061-007A, U+00C0-00D6, U+00D8-00F6, U+00F8-00FF;
+  size-adjust: 88%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Elvish Sans';
+  src: url('/fonts/elvish%20ring%20nfi.ttf') format('truetype');
+  unicode-range: U+0041-005A, U+0061-007A, U+00C0-00D6, U+00D8-00F6, U+00F8-00FF;
+  size-adjust: 112%;
+  font-display: swap;
+}
+
+/* Labels and captions are small tracked capitals: Elvish Ring's letters
+   need more size there to hold the same line. */
+@font-face {
+  font-family: 'Elvish Label';
+  src: url('/fonts/elvish%20ring%20nfi.ttf') format('truetype');
+  unicode-range: U+0041-005A, U+0061-007A, U+00C0-00D6, U+00D8-00F6, U+00F8-00FF;
+  size-adjust: 140%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Elvish Mono';
+  src: url('/fonts/elvish%20ring%20nfi.ttf') format('truetype');
+  unicode-range: U+0041-005A, U+0061-007A, U+00C0-00D6, U+00D8-00F6, U+00F8-00FF;
+  size-adjust: 135%;
+  font-display: swap;
+}
+
+/* ---- Dwarvish ----------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Runes Display';
+  src: url('/fonts/Moria.ttf') format('truetype');
+  unicode-range: U+0041-005A, U+0061-007A;
+  size-adjust: 84%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Runes Sans';
+  src: url('/fonts/Moria.ttf') format('truetype');
+  unicode-range: U+0041-005A, U+0061-007A;
+  size-adjust: 112%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Runes Mono';
+  src: url('/fonts/Moria.ttf') format('truetype');
+  unicode-range: U+0041-005A, U+0061-007A;
+  size-adjust: 112%;
+  font-display: swap;
+}
+
+/* ---- The Ring's inscription --------------------------------------------- */
+
+/* Real Tengwar (Johan Winge, Dan Smith encoding). It cannot set ordinary
+   text — its letters are keyboard codes — so it is used for exactly one
+   line, transcribed in advance: the inscription (see src/i18n/tengwar.ts).
+   `block`, not `swap`: a fallback face would show the raw codes. */
+@font-face {
+  font-family: 'Tengwar Annatar';
+  src: url('/fonts/tngan.ttf') format('truetype');
+  font-display: block;
+}
+
+/* ---- The modes ------------------------------------------------------------ */
+
+html.script-elvish {
+  --font-display: 'Elvish Display', var(--face-display);
+  --font-sans: 'Elvish Sans', var(--face-sans);
+  --font-label: 'Elvish Label', var(--face-sans);
+  --font-mono: 'Elvish Mono', var(--face-mono);
+}
+
+html.script-dwarvish {
+  --font-display: 'Runes Display', var(--face-display);
+  --font-sans: 'Runes Sans', var(--face-sans);
+  --font-label: 'Runes Sans', var(--face-sans);
+  --font-mono: 'Runes Mono', var(--face-mono);
+}
+
+/*
+ * The script faces reach further above and below the line than the site's
+ * own (Elvish ascenders especially). Text masks, which hide words rising into
+ * place, get a wider clip edge in these modes so no letter is sliced. Nothing
+ * moves: overflow-clip-margin changes where clipping happens, not the box.
+ */
+html:is(.script-elvish, .script-dwarvish) :is(.mask, .journey__word, .mordor__word, .split-word-mask, .split-line-mask) {
+  overflow-clip-margin: 0.3em;
+}
+
+/*
+ * Kept in the site's own faces whatever the mode: the language selector, the
+ * menu toggle, the skip link and the cursor. These are how a reader finds
+ * their way back, so they must read at a glance.
+ */
+.script-exempt {
+  --font-display: var(--face-display);
+  --font-sans: var(--face-sans);
+  --font-label: var(--face-sans);
+  --font-mono: var(--face-mono);
+  /* Re-declared, not just re-pointed: text that merely inherits would
+     otherwise keep the face <body> already resolved. */
+  font-family: var(--font-sans);
+}
+
+.inscription--tengwar {
+  font-family: 'Tengwar Annatar', var(--face-display);
+  font-style: normal;
+  /* The encoding is case-sensitive, and tracking would pull tehtar off
+     their letters. */
+  text-transform: none;
+  letter-spacing: 0;
+}

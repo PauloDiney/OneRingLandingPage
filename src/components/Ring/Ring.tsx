@@ -1,15 +1,10 @@
 import { useLayoutEffect, useRef } from 'react';
-import { gsap, ScrollTrigger } from '../../lib/gsap';
+import { gsap, ScrollTrigger, PLAY_ONCE } from '../../lib/gsap';
 import { MQ, matches } from '../../lib/media';
 import { createRingRenderer, type RingRenderer, type RingState } from './ringRenderer';
+import { useLanguage } from '../../hooks/useLanguage';
+import { T, Text } from '../../i18n';
 import './Ring.css';
-
-const VERSE = [
-  'One Ring to rule them all,',
-  'One Ring to find them,',
-  'One Ring to bring them all',
-  'and in the darkness bind them.',
-];
 
 /** Set at build time when /public/images/one-ring.png exists (vite.config.ts). */
 const RING_IMAGE = __RING_IMAGE__;
@@ -27,6 +22,7 @@ const RING_IMAGE = __RING_IMAGE__;
 export function Ring() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { messages } = useLanguage();
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
@@ -91,7 +87,7 @@ export function Ring() {
         duration: 1.2,
         stagger: 0.1,
         ease: 'expo.out',
-        scrollTrigger: { trigger: section, start: 'top 70%', once: true },
+        scrollTrigger: { trigger: section, start: 'top 70%', toggleActions: PLAY_ONCE },
       });
     }, section);
 
@@ -143,24 +139,30 @@ export function Ring() {
 
       <header className="ring__head">
         <p className="t-label" data-ring-intro>
-          04 — The Ring
+          04 — <T k="sections.ring" />
         </p>
         <h2 id="ring-title" className="ring__title t-lead" data-ring-intro>
-          A plain band of gold, and the verse written for it.
+          <T k="ring.title" />
         </h2>
       </header>
 
       <blockquote className="ring__verse">
-        {VERSE.map((line, i) => (
-          <p key={line} className={`ring__line ring__line--${i + 1}`} data-verse>
-            {line}
+        {/* Keyed by position, not text: the scrubbed timeline holds these
+            nodes, so a new language must change their words, not the nodes. */}
+        {messages.ring.verse.map((line, i) => (
+          <p key={i} className={`ring__line ring__line--${i + 1}`} data-verse>
+            <Text>{line}</Text>
           </p>
         ))}
       </blockquote>
 
       <div className="ring__foot t-mono" data-ring-caption aria-hidden="true">
-        <span>Fig. 04 — Real-time study</span>
-        <span>Au · polished · no ornament</span>
+        <span>
+          <T k="ring.study" />
+        </span>
+        <span>
+          <T k="ring.material" />
+        </span>
       </div>
     </section>
   );

@@ -4,12 +4,17 @@ import { MQ } from '../../lib/media';
 import { revealLabel, revealLines } from '../../lib/reveal';
 import { scrollToHash } from '../../lib/scroll';
 import { useMagnetic } from '../../hooks/useMagnetic';
+import { useLanguage } from '../../hooks/useLanguage';
+import { useTextLayoutEffect } from '../../hooks/useTextLayoutEffect';
 import { SECTIONS } from '../../data/sections';
+import { T } from '../../i18n';
 import './Footer.css';
 
 export function Footer() {
   const ref = useRef<HTMLElement>(null);
   const topRef = useRef<HTMLAnchorElement>(null);
+
+  const { t, script } = useLanguage();
 
   useMagnetic(topRef, 0.35);
 
@@ -19,7 +24,6 @@ export function Footer() {
 
     const ctx = gsap.context(() => {
       footer.querySelectorAll<HTMLElement>('[data-reveal="label"]').forEach((el) => revealLabel(el, { start: 'top 95%' }));
-      footer.querySelectorAll<HTMLElement>('[data-reveal="lines"]').forEach((el) => revealLines(el, { start: 'top 95%' }));
 
       // The wordmark rises out of the bottom edge as the page runs out.
       gsap.matchMedia().add(MQ.motion, () => {
@@ -34,6 +38,27 @@ export function Footer() {
     return () => ctx.revert();
   }, []);
 
+  // The notes are split into lines, so they are rebuilt when their words change.
+  const note = t('footer.note') + t('footer.work');
+  const colophonNote = t('footer.colophonNote');
+
+  useTextLayoutEffect(
+    (settled) => {
+      const footer = ref.current;
+      if (!footer) return;
+
+      const ctx = gsap.context(() => {
+        footer
+          .querySelectorAll<HTMLElement>('[data-reveal="lines"]')
+          .forEach((el) => revealLines(el, { start: 'top 95%', settled }));
+      }, footer);
+
+      return () => ctx.revert();
+    },
+    // Lines are split where the current face breaks them: a new face re-splits.
+    [note, colophonNote, script],
+  );
+
   const onNavigate = (e: MouseEvent<HTMLAnchorElement>) => {
     const hash = e.currentTarget.getAttribute('href');
     if (!hash?.startsWith('#')) return;
@@ -46,24 +71,34 @@ export function Footer() {
       <div className="footer__grid grid">
         <div className="footer__intro">
           <p className="t-label" data-reveal="label">
-            Middle-earth / 001
+            <T k="brand.name" /> / 001
           </p>
-          <p className="footer__note" data-reveal="lines">
-            A non-commercial digital study inspired by J.R.R. Tolkien’s <em>The Lord of the Rings</em>. Not affiliated
-            with the Tolkien Estate, Middle-earth Enterprises or Warner Bros.
+          <p key={note} className="footer__note" data-reveal="lines">
+            <T
+              k="footer.note"
+              values={{
+                work: (
+                  <em>
+                    <T k="footer.work" />
+                  </em>
+                ),
+              }}
+            />
           </p>
         </div>
 
-        <nav className="footer__nav" aria-label="Footer">
+        <nav className="footer__nav" aria-label={t('footer.nav')}>
           <p className="t-label" data-reveal="label">
-            Index
+            <T k="footer.index" />
           </p>
           <ol>
             {SECTIONS.map((s) => (
               <li key={s.id}>
-                <a href={`#${s.id}`} onClick={onNavigate} data-cursor="Explore">
+                <a href={`#${s.id}`} onClick={onNavigate} data-cursor={t('cursor.explore')}>
                   <span className="t-mono">{s.index}</span>
-                  <span>{s.label}</span>
+                  <span>
+                    <T k={`sections.${s.id}`} />
+                  </span>
                 </a>
               </li>
             ))}
@@ -72,22 +107,24 @@ export function Footer() {
 
         <div className="footer__meta">
           <p className="t-label" data-reveal="label">
-            Colophon
+            <T k="footer.colophon" />
           </p>
-          <p className="footer__note" data-reveal="lines">
-            React, GSAP and a single scroll-driven video. Set in Instrument Serif and Geist.
+          <p key={colophonNote} className="footer__note" data-reveal="lines">
+            <T k="footer.colophonNote" />
           </p>
           <a className="footer__top t-label" href="#top" ref={topRef} onClick={onNavigate} data-cursor="none">
             <span aria-hidden="true">↑</span>
-            <span className="sr-only">Back to the </span>
-            <span>Top</span>
+            <span className="sr-only">{t('footer.backTo')}</span>
+            <span>
+              <T k="footer.top" />
+            </span>
           </a>
         </div>
       </div>
 
       <div className="footer__base" aria-hidden="true">
         <p className="footer__wordmark" data-wordmark>
-          Middle-earth
+          <T k="brand.name" />
         </p>
       </div>
     </footer>

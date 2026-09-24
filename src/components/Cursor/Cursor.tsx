@@ -87,7 +87,7 @@ function CursorElement() {
   }, []);
 
   return (
-    <div className="cursor" ref={ref} aria-hidden="true">
+    <div className="cursor script-exempt" ref={ref} aria-hidden="true">
       <span className="cursor__ring" />
       <span className="cursor__dot" />
       <span className="cursor__label" ref={labelRef} />

@@ -2,6 +2,9 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { gsap, SplitText } from '../../lib/gsap';
 import { MQ, matches } from '../../lib/media';
 import { useScrollVideo } from '../../hooks/useScrollVideo';
+import { useTextLayoutEffect } from '../../hooks/useTextLayoutEffect';
+import { useLanguage } from '../../hooks/useLanguage';
+import { T, Text, Inscription } from '../../i18n';
 import { CHAPTERS, FILM_FPS, FINALE_IN } from '../../data/film';
 import { Hero } from '../Hero/Hero';
 import './ScrollVideo.css';
@@ -29,12 +32,18 @@ const timecode = (frame: number) =>
  *
  * The final screen of travel does not advance the film: it is where The
  * Journey (pulled up by a negative margin) rises over the last frame.
+ *
+ * Two scrubbed timelines share the film's range. The first moves everything
+ * that is not text and never re-runs. The second owns the split chapter names
+ * and the closing quote, and is rebuilt only when those strings change — a
+ * language switch never touches the video or its ScrollTrigger.
  */
 export function ScrollVideo() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const timecodeRef = useRef<HTMLSpanElement>(null);
+  const { t } = useLanguage();
 
   // Resolved once. Swapping `src` on resize would drop the buffer mid-scroll.
   const [source] = useState(() => (matches('(max-width: 900px)') ? SOURCES.mobile : SOURCES.desktop));
@@ -115,8 +124,65 @@ export function ScrollVideo() {
           .fromTo('[data-film-meta]', { opacity: 0, y: 10 * travel }, { opacity: 1, y: 0, duration: 0.04 }, 0.06)
           .fromTo('[data-film-bar]', { scaleX: 0 }, { scaleX: 1, duration: 1 }, 0);
 
-        // 2 — Chapters. Each arrives with a mask, a rise and a change of focus.
+        // 2 — The chapter counter rolls like an odometer: 01 → 02 → 03 → 04.
         CHAPTERS.forEach((chapter, i) => {
+          if (i > 0) {
+            tl.to('[data-counter-track]', { yPercent: -(100 / CHAPTERS.length) * i, duration: 0.02, ease: 'power2.inOut' }, chapter.in);
+          }
+        });
+
+        // 3 — Mordor's heat, following the red cast already in the footage.
+        tl.fromTo('[data-film-ember]', { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power1.inOut' }, 0.68);
+
+        // Pin the timeline's length to exactly 1 so positions map to progress.
+        tl.set({}, {}, 1);
+
+        // 4 — The curtain: the film recedes while The Journey rises over it.
+        // Its targets are wrappers the timeline above never touches, so the
+        // two ScrollTriggers can never fight over a property.
+        gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: {
+            trigger: section,
+            start: () => `top+=${filmDistance()} top`,
+            end: 'bottom bottom',
+            scrub: true,
+          },
+        })
+          .fromTo('[data-film-media]', { scale: 1, yPercent: 0 }, { scale: reduced ? 1 : 0.9, yPercent: -4 * travel, duration: 1 }, 0)
+          .fromTo('[data-film-dim]', { opacity: 0 }, { opacity: 0.85, duration: 1 }, 0)
+          .fromTo('[data-film-overlay]', { yPercent: 0, opacity: 1 }, { yPercent: -30 * travel, opacity: 0, duration: 0.6 }, 0);
+      });
+    }, section);
+
+    return () => ctx.revert();
+  }, [filmEnd, filmDistance]);
+
+  // ---- The words over the film: chapters and the closing inscription --------
+  const chapterNames = CHAPTERS.map((c) => t(`film.chapters.${c.id}.name`));
+  const finaleQuote = t('film.finale.quote');
+
+  useTextLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
+
+      mm.add({ always: 'all', desktop: MQ.desktop, reduced: MQ.reduced }, (context) => {
+        const { desktop, reduced } = context.conditions as { desktop: boolean; reduced: boolean };
+        const blur = (px: number) => (desktop && !reduced ? `blur(${px}px)` : 'blur(0px)');
+        const travel = reduced ? 0 : 1;
+
+        // Same range and scrub as the choreography, so the two timelines
+        // always stand at the same point of the film.
+        const tl = gsap.timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: { trigger: section, start: 'top top', end: filmEnd, scrub: reduced ? true : 0.45 },
+        });
+
+        // Chapters. Each arrives with a mask, a rise and a change of focus.
+        CHAPTERS.forEach((chapter) => {
           const root = section.querySelector<HTMLElement>(`[data-chapter="${chapter.id}"]`);
           if (!root) return;
 
@@ -145,17 +211,9 @@ export function ScrollVideo() {
             .to(meta, { clipPath: 'inset(0 0% 0 100%)', duration: OUT * 0.8, ease: 'power2.in' }, leave)
             .to(rule, { scaleX: 0, transformOrigin: 'right center', duration: OUT, ease: 'power2.in' }, leave)
             .to(rest, { y: -12 * travel, opacity: 0, duration: OUT * 0.7, ease: 'power2.in' }, leave);
-
-          // The counter rolls like an odometer: 01 → 02 → 03 → 04.
-          if (i > 0) {
-            tl.to('[data-counter-track]', { yPercent: -(100 / CHAPTERS.length) * i, duration: 0.02, ease: 'power2.inOut' }, chapter.in);
-          }
         });
 
-        // 3 — Mordor's heat, following the red cast already in the footage.
-        tl.fromTo('[data-film-ember]', { opacity: 0 }, { opacity: 1, duration: 0.2, ease: 'power1.inOut' }, 0.68);
-
-        // 4 — The inscription faces the camera. The film's last words stay.
+        // The inscription faces the camera. The film's last words stay.
         const quote = section.querySelector<HTMLElement>('[data-finale-quote]')!;
         const quoteChars = SplitText.create(quote, { type: 'words,chars', mask: 'words', wordsClass: 'split-word' }).chars;
         gsap.set('[data-finale]', { autoAlpha: 1 });
@@ -163,29 +221,12 @@ export function ScrollVideo() {
           .fromTo(quote, { filter: blur(10), opacity: 0 }, { filter: blur(0), opacity: 1, duration: 0.05 }, FINALE_IN)
           .fromTo('[data-finale-rest]', { y: 14 * travel, opacity: 0 }, { y: 0, opacity: 1, duration: 0.04, stagger: 0.01 }, FINALE_IN + 0.025);
 
-        // Pin the timeline's length to exactly 1 so positions map to progress.
         tl.set({}, {}, 1);
-
-        // 5 — The curtain: the film recedes while The Journey rises over it.
-        // Its targets are wrappers the timeline above never touches, so the
-        // two ScrollTriggers can never fight over a property.
-        gsap.timeline({
-          defaults: { ease: 'none' },
-          scrollTrigger: {
-            trigger: section,
-            start: () => `top+=${filmDistance()} top`,
-            end: 'bottom bottom',
-            scrub: true,
-          },
-        })
-          .fromTo('[data-film-media]', { scale: 1, yPercent: 0 }, { scale: reduced ? 1 : 0.9, yPercent: -4 * travel, duration: 1 }, 0)
-          .fromTo('[data-film-dim]', { opacity: 0 }, { opacity: 0.85, duration: 1 }, 0)
-          .fromTo('[data-film-overlay]', { yPercent: 0, opacity: 1 }, { yPercent: -30 * travel, opacity: 0, duration: 0.6 }, 0);
       });
     }, section);
 
     return () => ctx.revert();
-  }, [filmEnd, filmDistance]);
+  }, [...chapterNames, finaleQuote]);
 
   return (
     <section id="film" className="film" ref={sectionRef} aria-labelledby="film-title">
@@ -220,35 +261,39 @@ export function ScrollVideo() {
             hidden from assistive tech. The same story is told in the list below. */}
         <div className="film__overlay" data-film-overlay aria-hidden="true">
           <div className="film__chapters">
-            {CHAPTERS.map((chapter) => (
+            {CHAPTERS.map((chapter, i) => (
               <div key={chapter.id} className={`chapter chapter--${chapter.align}`} data-chapter={chapter.id}>
                 <p className="chapter__meta t-label" data-chapter-meta>
                   <span className="chapter__index">{chapter.index}</span>
                   <span className="chapter__rule" data-chapter-rule />
-                  <span>{chapter.region}</span>
+                  <span>
+                    <T k={`film.chapters.${chapter.id}.region`} />
+                  </span>
                 </p>
-                <p className="chapter__name" data-chapter-name>
-                  {chapter.name}
+                {/* Split into characters by GSAP: keyed by its text, so a new
+                    language arrives as a fresh node rather than a patched one. */}
+                <p key={chapterNames[i]} className="chapter__name" data-chapter-name>
+                  <T k={`film.chapters.${chapter.id}.name`} />
                 </p>
                 <p className="chapter__line t-lead" data-chapter-rest>
-                  {chapter.line}
+                  <T k={`film.chapters.${chapter.id}.line`} />
                 </p>
                 <p className="chapter__date t-mono" data-chapter-rest>
-                  {chapter.date}
+                  <Text>{chapter.date}</Text>
                 </p>
               </div>
             ))}
 
             <div className="finale" data-finale>
-              <p className="finale__quote" data-finale-quote>
-                One Ring to rule them all.
+              <p key={finaleQuote} className="finale__quote" data-finale-quote>
+                <T k="film.finale.quote" />
               </p>
               <div className="finale__source">
                 <p className="t-italic" data-finale-rest>
-                  Ash nazg durbatulûk
+                  <Inscription />
                 </p>
                 <p className="t-label" data-finale-rest>
-                  The inscription · Black Speech of Mordor
+                  <T k="film.finale.source" />
                 </p>
               </div>
             </div>
@@ -267,7 +312,9 @@ export function ScrollVideo() {
             </p>
 
             <p className="film__time t-mono">
-              <span>TC</span>
+              <span>
+                <Text>TC</Text>
+              </span>
               <span ref={timecodeRef} className="film__timecode">
                 00:00:00
               </span>
@@ -281,14 +328,14 @@ export function ScrollVideo() {
       </div>
 
       <div className="sr-only">
-        <h2>The film, in four moments</h2>
+        <h2>{t('film.srTitle')}</h2>
         <ol>
           {CHAPTERS.map((c) => (
             <li key={c.id}>
-              {c.name} — {c.line}
+              {t(`film.chapters.${c.id}.name`)} — {t(`film.chapters.${c.id}.line`)}
             </li>
           ))}
-          <li>At rest in Mordor, the ring’s inscription faces the camera: “One Ring to rule them all.”</li>
+          <li>{t('film.srFinale')}</li>
         </ol>
       </div>
     </section>

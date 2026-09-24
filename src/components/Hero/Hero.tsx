@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import { gsap, EASE_OUT } from '../../lib/gsap';
 import { prefersReducedMotion } from '../../lib/media';
+import { T } from '../../i18n';
 import './Hero.css';
 
 /**
@@ -46,7 +47,9 @@ export function Hero() {
       <div className="hero__scrim" data-hero-exit="scrim" aria-hidden="true" />
 
       <p className="hero__index t-label" data-hero-exit="index">
-        <span data-intro="label">Middle-earth</span>
+        <span data-intro="label">
+          <T k="brand.name" />
+        </span>
         <span className="hero__slash" data-intro="label" aria-hidden="true">
           /
         </span>
@@ -56,34 +59,40 @@ export function Hero() {
       <h1 className="hero__title t-display" id="film-title">
         <span className="hero__row hero__row--the" data-hero-exit="the">
           <span className="mask">
-            <span className="hero__word hero__word--the t-italic">The</span>
+            <span className="hero__word hero__word--the t-italic">
+              <T k="hero.the" />
+            </span>
           </span>
         </span>
         <span className="hero__row" data-hero-exit="one">
           <span className="mask">
-            <span className="hero__word">One</span>
+            <span className="hero__word">
+              <T k="hero.one" />
+            </span>
           </span>
         </span>
         <span className="hero__row hero__row--ring" data-hero-exit="ring">
           <span className="mask">
-            <span className="hero__word">Ring</span>
+            <span className="hero__word">
+              <T k="hero.ring" />
+            </span>
           </span>
         </span>
       </h1>
 
       <div className="hero__caption" data-hero-exit="caption">
         <p className="hero__lead t-lead" data-intro="rise">
-          A journey across Middle-earth.
+          <T k="hero.lead" />
         </p>
         <p className="hero__tech t-mono" data-intro="rise">
-          Scroll-driven film <span aria-hidden="true">·</span> 301 frames{' '}
-          <span aria-hidden="true">·</span> 10.03 s
+          <T k="hero.film" /> <span aria-hidden="true">·</span> <T k="hero.frames" />{' '}
+          <span aria-hidden="true">·</span> <T k="hero.duration" />
         </p>
       </div>
 
       <div className="hero__cue" data-hero-exit="cue" aria-hidden="true">
         <span className="t-label" data-intro="label">
-          Scroll to explore
+          <T k="hero.cue" />
         </span>
         <span className="hero__cue-track">
           <span className="hero__cue-line" />

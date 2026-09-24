@@ -1,6 +1,9 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { gsap, SplitText } from '../../lib/gsap';
 import { MQ, matches } from '../../lib/media';
+import { useLanguage } from '../../hooks/useLanguage';
+import { useTextLayoutEffect } from '../../hooks/useTextLayoutEffect';
+import { T } from '../../i18n';
 import './Mordor.css';
 
 /**
@@ -14,8 +17,12 @@ import './Mordor.css';
  */
 export function Mordor() {
   const ref = useRef<HTMLElement>(null);
+  const { t } = useLanguage();
+  const word = t('mordor.word');
 
-  useLayoutEffect(() => {
+  // The word is split into characters, so the timeline depends on it. It is
+  // "Mordor" in every language today: switching never rebuilds anything here.
+  useTextLayoutEffect(() => {
     const section = ref.current;
     if (!section) return;
 
@@ -58,7 +65,7 @@ export function Mordor() {
     }, section);
 
     return () => ctx.revert();
-  }, []);
+  }, [word]);
 
   return (
     <section id="mordor" className="mordor" ref={ref} data-tone="dark" aria-labelledby="mordor-title">
@@ -66,7 +73,7 @@ export function Mordor() {
         <div className="mordor__media" data-mordor-media>
           <img
             src="/images/mordor.webp"
-            alt="The Ring at rest on the map beside the word Mordor, its inscription glowing in the dark."
+            alt={t('mordor.alt')}
             width={1600}
             height={900}
             loading="lazy"
@@ -77,33 +84,34 @@ export function Mordor() {
         </div>
 
         <p className="mordor__label t-label" data-mordor-meta>
-          05 — Mordor
+          05 — <T k="sections.mordor" />
         </p>
         <p className="mordor__coords t-mono" data-mordor-meta>
-          Orodruin <span aria-hidden="true">—</span> Mount Doom
+          <T k="mordor.place" /> <span aria-hidden="true">—</span> <T k="mordor.mountain" />
         </p>
 
         {/* The wrapper centres; the word inside is free to move and overflow. */}
         <div className="mordor__title">
-          <h2 id="mordor-title" className="mordor__word" data-mordor-word>
-            Mordor
+          <h2 key={word} id="mordor-title" className="mordor__word" data-mordor-word>
+            <T k="mordor.word" />
           </h2>
         </div>
 
         <span className="mordor__line" data-mordor-line aria-hidden="true" />
 
         <div className="mordor__copy" data-mordor-copy>
-          <p className="t-lead">Where the shadows lie.</p>
+          <p className="t-lead">
+            <T k="mordor.lead" />
+          </p>
           <p className="t-body">
-            The journey ends where the Ring began: in the fires of Orodruin, the one place in all of Middle-earth hot
-            enough to unmake it.
+            <T k="mordor.body" />
           </p>
         </div>
 
         <div className="mordor__black" data-mordor-black aria-hidden="true" />
 
         <p className="mordor__final" data-mordor-final>
-          The road goes ever on.
+          <T k="mordor.final" />
         </p>
       </div>
     </section>

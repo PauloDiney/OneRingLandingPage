@@ -1,9 +1,9 @@
+/** Text for each chapter lives in the dictionaries, under `film.chapters.<id>`. */
+export type ChapterId = 'shire' | 'rivendell' | 'kingdoms' | 'mordor';
+
 export type Chapter = {
-  id: string;
+  id: ChapterId;
   index: string;
-  region: string;
-  name: string;
-  line: string;
   date: string;
   /** Film progress (0–1) at which the chapter starts to arrive. */
   in: number;
@@ -23,50 +23,10 @@ export type Chapter = {
  * Re-derive from a contact sheet if the video is ever replaced (see README).
  */
 export const CHAPTERS: Chapter[] = [
-  {
-    id: 'shire',
-    index: '01',
-    region: 'Eriador',
-    name: 'The Shire',
-    line: 'Where the road begins.',
-    date: '23 · IX · 3018',
-    in: 0.085,
-    out: 0.28,
-    align: 'left',
-  },
-  {
-    id: 'rivendell',
-    index: '02',
-    region: 'Imladris',
-    name: 'Rivendell',
-    line: 'Where the burden is given a name.',
-    date: '25 · X · 3018',
-    in: 0.3,
-    out: 0.48,
-    align: 'right',
-  },
-  {
-    id: 'kingdoms',
-    index: '03',
-    region: 'The kingdoms of Men',
-    name: 'Rohan & Gondor',
-    line: 'Across the realms that held the line.',
-    date: '15 · III · 3019',
-    in: 0.5,
-    out: 0.685,
-    align: 'left',
-  },
-  {
-    id: 'mordor',
-    index: '04',
-    region: 'The Black Land',
-    name: 'Mordor',
-    line: 'Where the shadows lie.',
-    date: '25 · III · 3019',
-    in: 0.71,
-    out: 0.885,
-    align: 'right',
-  },
+  { id: 'shire', index: '01', date: '23 · IX · 3018', in: 0.085, out: 0.28, align: 'left' },
+  { id: 'rivendell', index: '02', date: '25 · X · 3018', in: 0.3, out: 0.48, align: 'right' },
+  { id: 'kingdoms', index: '03', date: '15 · III · 3019', in: 0.5, out: 0.685, align: 'left' },
+  { id: 'mordor', index: '04', date: '25 · III · 3019', in: 0.71, out: 0.885, align: 'right' },
 ];
 
 /** When the closing inscription arrives. It stays until the film ends. */

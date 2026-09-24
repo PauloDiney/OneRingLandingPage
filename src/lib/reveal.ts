@@ -1,4 +1,4 @@
-import { gsap, SplitText, EASE_OUT } from './gsap';
+import { gsap, SplitText, EASE_OUT, PLAY_ONCE } from './gsap';
 import { prefersReducedMotion } from './media';
 
 /*
@@ -14,23 +14,37 @@ type RevealOptions = {
   start?: string;
   delay?: number;
   stagger?: number;
+  /**
+   * Rebuilt after a language change: if the reader has already scrolled past
+   * the start, show the end state at once instead of playing the reveal again.
+   */
+  settled?: boolean;
 };
 
 const scrollTrigger = (el: Element, opts: RevealOptions) => ({
   trigger: opts.trigger ?? el,
   start: opts.start ?? 'top 86%',
-  once: true,
+  toggleActions: PLAY_ONCE,
 });
+
+function settle<A extends gsap.core.Animation>(animation: A, opts: RevealOptions): A {
+  const st = animation.scrollTrigger;
+  if (opts.settled && st && st.scroll() >= st.start) animation.progress(1);
+  return animation;
+}
 
 /** Reduced motion: content still arrives, but without travelling. */
 function fadeIn(el: Element, opts: RevealOptions) {
-  return gsap.from(el, {
-    opacity: 0,
-    duration: 0.6,
-    ease: 'power1.out',
-    delay: opts.delay ?? 0,
-    scrollTrigger: scrollTrigger(el, opts),
-  });
+  return settle(
+    gsap.from(el, {
+      opacity: 0,
+      duration: 0.6,
+      ease: 'power1.out',
+      delay: opts.delay ?? 0,
+      scrollTrigger: scrollTrigger(el, opts),
+    }),
+    opts,
+  );
 }
 
 /**
@@ -47,15 +61,18 @@ export function revealLines(el: HTMLElement, opts: RevealOptions = {}) {
     linesClass: 'split-line',
     autoSplit: true,
     onSplit: (self) =>
-      gsap.from(self.lines, {
-        yPercent: 110,
-        opacity: 0.2,
-        duration: 1.3,
-        ease: EASE_OUT,
-        stagger: opts.stagger ?? 0.085,
-        delay: opts.delay ?? 0,
-        scrollTrigger: scrollTrigger(el, opts),
-      }),
+      settle(
+        gsap.from(self.lines, {
+          yPercent: 110,
+          opacity: 0.2,
+          duration: 1.3,
+          ease: EASE_OUT,
+          stagger: opts.stagger ?? 0.085,
+          delay: opts.delay ?? 0,
+          scrollTrigger: scrollTrigger(el, opts),
+        }),
+        opts,
+      ),
   });
 }
 
@@ -77,16 +94,19 @@ export function revealChars(el: HTMLElement, opts: RevealOptions = {}) {
   });
   const spread = parseFloat(getComputedStyle(el).fontSize) * 0.05;
 
-  gsap
-    .timeline({ scrollTrigger: scrollTrigger(el, opts), delay: opts.delay ?? 0 })
-    .from(split.chars, {
-      yPercent: 115,
-      x: (i: number, _t: Element, all: Element[]) => (i - (all.length - 1) / 2) * spread,
-      duration: 1.4,
-      ease: EASE_OUT,
-      stagger: opts.stagger ?? 0.025,
-    })
-    .from(el, { filter: 'blur(8px)', duration: 1, ease: 'power2.out', clearProps: 'filter' }, 0);
+  settle(
+    gsap
+      .timeline({ scrollTrigger: scrollTrigger(el, opts), delay: opts.delay ?? 0 })
+      .from(split.chars, {
+        yPercent: 115,
+        x: (i: number, _t: Element, all: Element[]) => (i - (all.length - 1) / 2) * spread,
+        duration: 1.4,
+        ease: EASE_OUT,
+        stagger: opts.stagger ?? 0.025,
+      })
+      .from(el, { filter: 'blur(8px)', duration: 1, ease: 'power2.out', clearProps: 'filter' }, 0),
+    opts,
+  );
 
   return split;
 }
@@ -95,28 +115,34 @@ export function revealChars(el: HTMLElement, opts: RevealOptions = {}) {
 export function revealRule(el: Element, opts: RevealOptions & { origin?: 'left' | 'right' } = {}) {
   if (prefersReducedMotion()) return fadeIn(el, opts);
 
-  return gsap.from(el, {
-    scaleX: 0,
-    transformOrigin: `${opts.origin ?? 'left'} center`,
-    duration: 1.6,
-    ease: 'expo.inOut',
-    delay: opts.delay ?? 0,
-    scrollTrigger: scrollTrigger(el, opts),
-  });
+  return settle(
+    gsap.from(el, {
+      scaleX: 0,
+      transformOrigin: `${opts.origin ?? 'left'} center`,
+      duration: 1.6,
+      ease: 'expo.inOut',
+      delay: opts.delay ?? 0,
+      scrollTrigger: scrollTrigger(el, opts),
+    }),
+    opts,
+  );
 }
 
 /** Small labels: slide out from behind a clip edge. */
 export function revealLabel(el: Element, opts: RevealOptions = {}) {
   if (prefersReducedMotion()) return fadeIn(el, opts);
 
-  return gsap.from(el, {
-    clipPath: 'inset(0 100% 0 0)',
-    x: -12,
-    opacity: 0,
-    duration: 1.1,
-    ease: EASE_OUT,
-    delay: opts.delay ?? 0,
-    clearProps: 'clipPath',
-    scrollTrigger: scrollTrigger(el, opts),
-  });
+  return settle(
+    gsap.from(el, {
+      clipPath: 'inset(0 100% 0 0)',
+      x: -12,
+      opacity: 0,
+      duration: 1.1,
+      ease: EASE_OUT,
+      delay: opts.delay ?? 0,
+      clearProps: 'clipPath',
+      scrollTrigger: scrollTrigger(el, opts),
+    }),
+    opts,
+  );
 }

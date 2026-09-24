@@ -5,9 +5,20 @@
    ========================================================================== */
 
 :root {
-  --font-display: 'Instrument Serif', 'Times New Roman', serif;
-  --font-sans: 'Geist Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  /* The site's own faces. Nothing ever swaps these: controls that must stay
+     legible in every script mode are set in them (see .script-exempt). */
+  --face-display: 'Instrument Serif', 'Times New Roman', serif;
+  --face-sans: 'Geist Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --face-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* What text is set in. The Elvish and Dwarvish modes swap these on
+     <html> (styles/scripts.css), so every rule below follows automatically. */
+  --font-display: var(--face-display);
+  --font-sans: var(--face-sans);
+  --font-mono: var(--face-mono);
+  /* Small tracked capitals (.t-label): a role of its own, because a script
+     face needs a different size there than in running text. */
+  --font-label: var(--face-sans);
 
   /* Display sizes lean on the viewport so words can own the screen. */
   --fs-mega: clamp(4.75rem, 19vw, 24rem);
@@ -61,7 +72,7 @@
 }
 
 .t-label {
-  font-family: var(--font-sans);
+  font-family: var(--font-label);
   font-size: var(--fs-label);
   font-weight: 500;
   line-height: 1.3;

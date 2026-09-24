@@ -10,6 +10,7 @@ import { Mordor } from './components/Mordor/Mordor';
 import { Footer } from './components/Footer/Footer';
 import { ScrollIndicator } from './components/ScrollIndicator/ScrollIndicator';
 import { Cursor } from './components/Cursor/Cursor';
+import { T } from './i18n';
 
 /*
  * Order matters here. Effects run in tree order, so sections create their
@@ -31,8 +32,8 @@ export default function App() {
 
   return (
     <>
-      <a className="skip-link" href="#journey">
-        Skip the film
+      <a className="skip-link script-exempt" href="#journey">
+        <T k="skip" />
       </a>
 
       <Navbar />

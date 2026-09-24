@@ -1,10 +1,15 @@
 import type { Region } from '../../data/regions';
 import { REGIONS } from '../../data/regions';
+import { useLanguage } from '../../hooks/useLanguage';
+import { T } from '../../i18n';
 
 type Props = { region: Region; position: number };
 
 export function RegionPanel({ region, position }: Props) {
+  const { t } = useLanguage();
   const portrait = region.height > region.width;
+  const item = `regions.items.${region.id}` as const;
+  const name = t(`${item}.name`);
 
   return (
     <article
@@ -24,19 +29,23 @@ export function RegionPanel({ region, position }: Props) {
       </p>
 
       <div className="region__copy">
-        <p className="region__kicker t-lead">{region.kicker}</p>
-        <p className="region__desc">{region.description}</p>
+        <p className="region__kicker t-lead">
+          <T k={`${item}.kicker`} />
+        </p>
+        <p className="region__desc">
+          <T k={`${item}.description`} />
+        </p>
       </div>
 
       <figure
         className={`region__frame ${portrait ? 'region__frame--portrait' : 'region__frame--landscape'}`}
         style={{ aspectRatio: `${region.width} / ${region.height}` }}
         data-region-frame
-        data-cursor="View"
+        data-cursor={t('cursor.view')}
       >
         <img
           src={region.image}
-          alt={region.alt}
+          alt={t(`${item}.alt`)}
           width={region.width}
           height={region.height}
           loading="lazy"
@@ -45,25 +54,36 @@ export function RegionPanel({ region, position }: Props) {
         />
         <span className="region__tint" aria-hidden="true" />
         <figcaption className="region__caption t-mono">
-          Fig. 03.{position + 1} — {region.seat}
+          <T k="regions.fig" /> 03.{position + 1} — <T k={`${item}.seat`} />
         </figcaption>
       </figure>
 
-      <h3 className="region__name" id={`region-${region.id}`} data-region-name>
-        {region.name}
+      {/* Split into characters by GSAP (see Regions.tsx), so keyed by its text. */}
+      <h3 key={name} className="region__name" id={`region-${region.id}`} data-region-name>
+        <T k={`${item}.name`} />
       </h3>
 
       <dl className="region__facts">
         <div>
-          <dt className="t-label">Seat</dt>
-          <dd>{region.seat}</dd>
+          <dt className="t-label">
+            <T k="regions.facts.seat" />
+          </dt>
+          <dd>
+            <T k={`${item}.seat`} />
+          </dd>
         </div>
         <div>
-          <dt className="t-label">Event</dt>
-          <dd>{region.event}</dd>
+          <dt className="t-label">
+            <T k="regions.facts.event" />
+          </dt>
+          <dd>
+            <T k={`${item}.event`} />
+          </dd>
         </div>
         <div>
-          <dt className="t-label">Date</dt>
+          <dt className="t-label">
+            <T k="regions.facts.date" />
+          </dt>
           <dd className="t-mono">{region.date}</dd>
         </div>
         {/* Where this region sits on the road: the one discreet graphic. */}

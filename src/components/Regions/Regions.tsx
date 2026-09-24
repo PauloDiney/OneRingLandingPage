@@ -1,8 +1,11 @@
 import { useLayoutEffect, useRef } from 'react';
-import { gsap, SplitText, EASE_OUT } from '../../lib/gsap';
+import { gsap, ScrollTrigger, SplitText, EASE_OUT, PLAY_ONCE } from '../../lib/gsap';
 import { MQ, matches } from '../../lib/media';
 import { revealChars, revealLabel, revealLines } from '../../lib/reveal';
+import { useLanguage } from '../../hooks/useLanguage';
+import { useTextLayoutEffect } from '../../hooks/useTextLayoutEffect';
 import { REGIONS } from '../../data/regions';
+import { T } from '../../i18n';
 import { RegionPanel } from './RegionPanel';
 import './Regions.css';
 
@@ -10,10 +13,17 @@ import './Regions.css';
 const HORIZONTAL = `${MQ.desktop} and ${MQ.motion}`;
 const VERTICAL = `${MQ.mobile}, ${MQ.reduced}`;
 
+/** The pinned track's tween, which the per-panel triggers ride on. */
+const TRACK_ID = 'regions-track';
+
 export function Regions() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const { t, script } = useLanguage();
 
+  // ---- The pin, the track and everything that is not split text --------------
+  // Built once. A pin created later than the triggers below it would be
+  // measured in the wrong order, so a language change must never rebuild this.
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const track = trackRef.current;
@@ -31,6 +41,7 @@ export function Regions() {
           x: () => -distance(),
           ease: 'none',
           scrollTrigger: {
+            id: TRACK_ID,
             trigger: section,
             start: 'top top',
             end: () => `+=${distance()}`,
@@ -65,7 +76,6 @@ export function Regions() {
           const frame = panel.querySelector<HTMLElement>('[data-region-frame]')!;
           const img = panel.querySelector<HTMLElement>('[data-region-img]')!;
           const num = panel.querySelector<HTMLElement>('[data-region-num]')!;
-          const name = panel.querySelector<HTMLElement>('[data-region-name]')!;
 
           // Image: uncovered from its leading edge while it slides in…
           gsap.fromTo(frame, { clipPath: 'inset(0% 0% 0% 100%)' }, {
@@ -83,12 +93,6 @@ export function Regions() {
 
           // The big number travels faster than the panel.
           gsap.fromTo(num, { xPercent: 35 }, { xPercent: -30, ease: 'none', scrollTrigger: inTrack(panel, 'left right', 'right left') });
-
-          // The name assembles as its panel arrives.
-          const chars = SplitText.create(name, { type: 'chars', charsClass: 'region__char' }).chars;
-          gsap.timeline({ scrollTrigger: inTrack(panel, 'left 70%', 'left 20%') })
-            .fromTo(chars, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.04, ease: 'power3.out' }, 0)
-            .fromTo(name, { letterSpacing: '0.1em' }, { letterSpacing: '-0.015em', ease: 'power2.out' }, 0);
 
           gsap.fromTo(panel.querySelectorAll('.region__copy > *, .region__facts > div, .region__index'),
             { y: 24, opacity: 0 },
@@ -118,16 +122,14 @@ export function Regions() {
         const reduced = matches(MQ.reduced);
         panels.forEach((panel) => {
           const frame = panel.querySelector<HTMLElement>('[data-region-frame]')!;
-          const name = panel.querySelector<HTMLElement>('[data-region-name]')!;
           if (!reduced) {
             gsap.fromTo(frame, { clipPath: 'inset(100% 0% 0% 0%)' }, {
               clipPath: 'inset(0% 0% 0% 0%)',
               duration: 1.4,
               ease: 'expo.inOut',
-              scrollTrigger: { trigger: frame, start: 'top 88%', once: true },
+              scrollTrigger: { trigger: frame, start: 'top 88%', toggleActions: PLAY_ONCE },
             });
           }
-          revealChars(name, { trigger: name, start: 'top 92%' });
         });
 
         // Stacked, the Mordor panel is simply dark (see Regions.css).
@@ -138,11 +140,8 @@ export function Regions() {
         };
       });
 
-      // ---- Shared: the intro copy ----------------------------------------------
+      // ---- Shared: the intro label ---------------------------------------------
       section.querySelectorAll<HTMLElement>('[data-reveal="label"]').forEach((el) => revealLabel(el));
-      section.querySelectorAll<HTMLElement>('[data-reveal="lines"]').forEach((el) => revealLines(el));
-      const title = section.querySelector<HTMLElement>('[data-regions-title]');
-      if (title) revealChars(title, { stagger: 0.02 });
 
       mm.add(HORIZONTAL, () => {
         gsap.fromTo('[data-regions-hint]', { scaleX: 0.35 }, { scaleX: 1, duration: 1.4, ease: EASE_OUT, repeat: -1, repeatDelay: 0.3 });
@@ -152,23 +151,97 @@ export function Regions() {
     return () => ctx.revert();
   }, []);
 
+  // ---- Split text: the title, the lede and the region names -----------------
+  const titleLead = t('regions.titleLead');
+  const titleEm = t('regions.titleEm');
+  const lede = t('regions.lede');
+  const names = REGIONS.map((region) => t(`regions.items.${region.id}.name`));
+
+  useTextLayoutEffect(
+    (settled) => {
+      const section = sectionRef.current;
+      if (!section) return;
+
+      // Triggers riding the track update only when the track moves. Rebuilt
+      // mid-track, they must be told where it already is — once they have been
+      // measured, which happens when their matchMedia callback returns.
+      let riders: ScrollTrigger[] = [];
+      const syncRiders = () => riders.forEach((st) => st.update(false, false, true));
+
+      const ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+        const panels = gsap.utils.toArray<HTMLElement>('[data-region]');
+
+        // Each name assembles as its panel arrives, riding the pinned track.
+        mm.add(HORIZONTAL, () => {
+          const move = ScrollTrigger.getById(TRACK_ID)?.animation;
+          if (!move) return;
+
+          // Riders hook themselves onto the track's onUpdate, and killing a
+          // rider does not unhook it. Keep the chain as it was before these
+          // were added, and put it back when they are rebuilt.
+          const trackUpdate = move.eventCallback('onUpdate');
+
+          riders = panels.map((panel) => {
+            const name = panel.querySelector<HTMLElement>('[data-region-name]')!;
+            const chars = SplitText.create(name, { type: 'chars', charsClass: 'region__char' }).chars;
+            return gsap
+              .timeline({ scrollTrigger: { trigger: panel, containerAnimation: move, start: 'left 70%', end: 'left 20%', scrub: true } })
+              .fromTo(chars, { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, stagger: 0.04, ease: 'power3.out' }, 0)
+              .fromTo(name, { letterSpacing: '0.1em' }, { letterSpacing: '-0.015em', ease: 'power2.out' }, 0)
+              .scrollTrigger!;
+          });
+
+          return () => {
+            riders = [];
+            move.eventCallback('onUpdate', trackUpdate);
+          };
+        });
+
+        mm.add(VERTICAL, () => {
+          panels.forEach((panel) => {
+            const name = panel.querySelector<HTMLElement>('[data-region-name]')!;
+            revealChars(name, { trigger: name, start: 'top 92%', settled });
+          });
+        });
+
+        section.querySelectorAll<HTMLElement>('[data-reveal="lines"]').forEach((el) => revealLines(el, { settled }));
+        const title = section.querySelector<HTMLElement>('[data-regions-title-text]');
+        if (title) revealChars(title, { stagger: 0.02, settled });
+      }, section);
+
+      syncRiders();
+
+      return () => ctx.revert();
+    },
+    // Lines are split where the current face breaks them: a new face re-splits.
+    [titleLead, titleEm, lede, ...names, script],
+  );
+
   return (
     <section id="regions" className="regions" ref={sectionRef} data-tone="light" aria-labelledby="regions-title">
-      <div className="regions__track" ref={trackRef}>
+      <div className="regions__track" ref={trackRef} data-layout-probe>
         <header className="regions__intro" data-regions-intro>
           <p className="t-label" data-reveal="label">
-            03 — Regions
+            03 — <T k="sections.regions" />
           </p>
-          <h2 id="regions-title" className="regions__title" data-regions-title>
-            Five lands, <em>one road.</em>
-          </h2>
+          {/* The wrapper drifts with the track; the heading inside is split. */}
+          <div data-regions-title>
+            <h2 key={titleLead + titleEm} id="regions-title" className="regions__title" data-regions-title-text>
+              <T k="regions.titleLead" />{' '}
+              <em>
+                <T k="regions.titleEm" />
+              </em>
+            </h2>
+          </div>
           <div className="regions__drift" data-regions-drift>
-            <p className="regions__lede" data-reveal="lines">
-              Each region on the map is a chapter of the same walk — from the quietest valley in the west to the only
-              mountain that matters.
+            <p key={lede} className="regions__lede" data-reveal="lines">
+              <T k="regions.lede" />
             </p>
             <p className="regions__hint t-label" aria-hidden="true">
-              <span>Keep scrolling</span>
+              <span>
+                <T k="regions.hint" />
+              </span>
               <span className="regions__hint-line" data-regions-hint />
             </p>
           </div>

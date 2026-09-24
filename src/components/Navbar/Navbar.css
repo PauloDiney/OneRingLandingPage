@@ -126,6 +126,19 @@ html.menu-open .nav {
   transform: translateY(-100%);
 }
 
+/* In a script mode the twin that rolls up on hover reads in plain letters:
+   hovering a link decodes it. */
+html.script-elvish .nav__roll::after,
+html.script-dwarvish .nav__roll::after {
+  font-family: var(--face-sans);
+}
+
+/* ---- Language ------------------------------------------------------------- */
+
+.nav__lang {
+  margin-left: clamp(0rem, 1vw, 1rem);
+}
+
 /* ---- Circular menu button ------------------------------------------------ */
 
 .nav__menu {
@@ -173,7 +186,9 @@ html.menu-open .nav {
 }
 
 @media (max-width: 899px) {
-  .nav__links {
+  /* On phones the language choice lives in the menu instead. */
+  .nav__links,
+  .nav__lang {
     display: none;
   }
 

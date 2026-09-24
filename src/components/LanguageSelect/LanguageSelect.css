@@ -1,0 +1,288 @@
+/* ==========================================================================
+   Language selector.
+   Popover: lives in the header and takes its colours from the header's
+   --nav-* tokens, so it follows the surface underneath (ink or paper).
+   Inline: the same choice inside the fullscreen menu, sized for thumbs.
+   ========================================================================== */
+
+.lang {
+  position: relative;
+}
+
+/* ---- Trigger: a stacked micro-label, LANGUAGE over the current code -------- */
+
+.lang__trigger {
+  display: grid;
+  justify-items: start;
+  align-content: center;
+  gap: 0.28rem;
+  min-height: 2.75rem;
+  padding-block: 0.25rem;
+  color: var(--nav-fg);
+  text-align: left;
+}
+
+.lang__kicker {
+  font-size: 0.5625rem;
+  letter-spacing: 0.2em;
+  color: var(--nav-muted);
+  transition: color 0.5s var(--ease-out);
+}
+
+.lang__trigger:hover .lang__kicker,
+.lang__trigger:focus-visible .lang__kicker,
+.lang.is-open .lang__kicker {
+  color: var(--nav-fg);
+}
+
+.lang__current {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  line-height: 1;
+}
+
+.lang__code-roll {
+  display: inline-block;
+  overflow: hidden;
+}
+
+/* A new code rises into place when the language changes. */
+.lang__code-text {
+  display: inline-block;
+  animation: lang-code-in 0.6s var(--ease-out);
+}
+
+@keyframes lang-code-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.lang__caret {
+  width: 0.36rem;
+  height: 0.36rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.7;
+  transform: translateY(-0.12rem) rotate(45deg);
+  transition: transform 0.45s var(--ease-out);
+}
+
+.lang.is-open .lang__caret {
+  transform: translateY(0.1rem) rotate(225deg);
+}
+
+/* ---- Panel ---------------------------------------------------------------- */
+
+.lang__panel {
+  position: absolute;
+  top: calc(100% + 0.9rem);
+  right: 0;
+  width: 17.5rem;
+  max-width: calc(100vw - 2 * var(--margin));
+  padding: 0.95rem 0.9rem 0.85rem;
+  background: rgb(var(--nav-rgb));
+  border: 1px solid var(--nav-rule);
+  color: var(--nav-fg);
+  box-shadow: 0 1.5rem 3rem -2rem rgba(0, 0, 0, 0.55);
+  /* Shown by GSAP (autoAlpha). */
+  visibility: hidden;
+  opacity: 0;
+}
+
+.lang__heading {
+  padding: 0 0.3rem 0.75rem;
+  border-bottom: 1px solid var(--nav-rule);
+  font-size: 0.5625rem;
+  letter-spacing: 0.2em;
+  color: var(--nav-muted);
+}
+
+.lang__list {
+  display: grid;
+  padding-block: 0.35rem;
+}
+
+.lang__option {
+  display: grid;
+  grid-template-columns: 0.6rem 1fr auto auto;
+  align-items: center;
+  column-gap: 0.65rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.3rem;
+  color: var(--nav-muted);
+  text-align: left;
+  transition: color 0.4s var(--ease-out);
+}
+
+.lang__option:hover,
+.lang__option:focus-visible,
+.lang__option[aria-current='true'] {
+  color: var(--nav-fg);
+}
+
+.lang__option:focus-visible {
+  outline-offset: -1px;
+}
+
+.lang__dot {
+  justify-self: center;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--c-gold);
+  opacity: 0;
+  transform: scale(0.3);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+}
+
+.lang__option[aria-current='true'] .lang__dot {
+  opacity: 1;
+  transform: none;
+}
+
+.lang__label {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+/* PORTUGUÊS · ENGLISH · ELVISH · DWARVISH — set like the nav, so the list
+   reads as modes of the same interface. */
+.lang__name {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.lang__caption {
+  font-size: 0.5625rem;
+  color: var(--nav-muted);
+}
+
+.lang__sample {
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--nav-muted);
+  animation: lang-sample-in 0.5s var(--ease-out);
+}
+
+/* Each mode's name, drawn in the face that mode uses. */
+.lang__sample--elvish {
+  font-family: 'Elvish Sans', var(--face-sans);
+  font-size: 1.05rem;
+}
+
+.lang__sample--dwarvish {
+  font-family: 'Runes Sans', var(--face-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+
+@keyframes lang-sample-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.lang__code {
+  min-width: 2.7em;
+  font-size: 0.625rem;
+  text-align: right;
+  color: var(--nav-muted);
+}
+
+.lang__note {
+  margin-top: 0.35rem;
+  padding: 0.75rem 0.3rem 0;
+  border-top: 1px solid var(--nav-rule);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--nav-muted);
+}
+
+/* ---- Inline (inside the fullscreen menu) --------------------------------- */
+
+.lang-inline {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.lang-inline__label {
+  color: var(--c-ash);
+}
+
+.lang-inline__list {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 0.25rem 1.5rem;
+}
+
+.lang-inline__option {
+  display: grid;
+  justify-items: start;
+  align-content: center;
+  gap: 0.2rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding-block: 0.3rem;
+  color: var(--c-stone);
+  text-align: left;
+  transition: color 0.4s var(--ease-out);
+}
+
+.lang-inline__option:hover,
+.lang-inline__option:focus-visible,
+.lang-inline__option[aria-current='true'] {
+  color: var(--c-bone);
+}
+
+.lang-inline__code {
+  position: relative;
+}
+
+.lang-inline__code::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -0.7em;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: var(--c-gold);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+.lang-inline__option[aria-current='true'] .lang-inline__code::after {
+  opacity: 1;
+}
+
+.lang-inline__name {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 479px) {
+  .lang-inline__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lang__code-text,
+  .lang__sample {
+    animation: none;
+  }
+}

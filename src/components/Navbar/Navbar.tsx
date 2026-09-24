@@ -4,7 +4,10 @@ import { prefersReducedMotion } from '../../lib/media';
 import { scrollToHash } from '../../lib/scroll';
 import { useMagnetic } from '../../hooks/useMagnetic';
 import { useSurfaceTone } from '../../hooks/useSurfaceTone';
+import { useLanguage } from '../../hooks/useLanguage';
 import { NAV_LINKS, SECTIONS } from '../../data/sections';
+import { T } from '../../i18n';
+import { LanguageSelect } from '../LanguageSelect/LanguageSelect';
 import './Navbar.css';
 
 export function Navbar() {
@@ -13,6 +16,7 @@ export function Navbar() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuTl = useRef<gsap.core.Timeline | null>(null);
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
 
   useMagnetic(buttonRef);
   // Frosted ink over film, frosted paper over paper.
@@ -97,7 +101,7 @@ export function Navbar() {
       }
       if (e.key !== 'Tab' || !menuRef.current || !buttonRef.current) return;
 
-      const focusables = [buttonRef.current, ...menuRef.current.querySelectorAll<HTMLElement>('a[href]')];
+      const focusables = [buttonRef.current, ...menuRef.current.querySelectorAll<HTMLElement>('a[href], button')];
       const index = focusables.indexOf(document.activeElement as HTMLElement);
       const next = e.shiftKey
         ? (index <= 0 ? focusables.length : index) - 1
@@ -126,19 +130,25 @@ export function Navbar() {
   return (
     <>
       <header className="nav" ref={headerRef} data-tone="dark">
-        <a className="nav__logo t-label" href="#top" onClick={onNavigate} data-nav-item data-cursor="Top">
+        <a className="nav__logo t-label" href="#top" onClick={onNavigate} data-nav-item data-cursor={t('cursor.top')}>
           <span className="nav__mark" aria-hidden="true" />
-          <span>Middle-earth</span>
-          <span className="sr-only"> — back to the top</span>
+          <span>
+            <T k="brand.name" />
+          </span>
+          <span className="sr-only"> {t('nav.backToTop')}</span>
         </a>
 
-        <nav className="nav__links" aria-label="Primary">
+        <nav className="nav__links" aria-label={t('nav.primary')}>
           <ul>
             {NAV_LINKS.map((link) => (
               <li key={link.href} data-nav-item>
-                <a className="nav__link t-label" href={link.href} onClick={onNavigate} data-cursor="Explore">
-                  <span className="nav__roll" data-text={link.label}>
-                    <span>{link.label}</span>
+                <a className="nav__link t-label" href={link.href} onClick={onNavigate} data-cursor={t('cursor.explore')}>
+                  {/* The twin that rolls up on hover reads in plain letters in
+                      a script mode (Navbar.css): hovering decodes the label. */}
+                  <span className="nav__roll" data-text={t(`sections.${link.section}`)}>
+                    <span>
+                      <T k={`sections.${link.section}`} />
+                    </span>
                   </span>
                 </a>
               </li>
@@ -146,17 +156,23 @@ export function Navbar() {
           </ul>
         </nav>
 
+        <div className="nav__lang" data-nav-item>
+          <LanguageSelect />
+        </div>
+
         <button
           ref={buttonRef}
           type="button"
-          className={`nav__menu t-label ${open ? 'is-open' : ''}`}
+          className={`nav__menu t-label script-exempt ${open ? 'is-open' : ''}`}
           aria-expanded={open}
           aria-controls="site-menu"
           onClick={() => setOpen((v) => !v)}
           data-nav-item
           data-cursor="none"
         >
-          <span className="nav__menu-label">{open ? 'Close' : 'Menu'}</span>
+          <span className="nav__menu-label">
+            <T k={open ? 'nav.close' : 'nav.menu'} />
+          </span>
         </button>
       </header>
 
@@ -166,21 +182,23 @@ export function Navbar() {
         className="menu"
         role="dialog"
         aria-modal="true"
-        aria-label="Site menu"
+        aria-label={t('nav.siteMenu')}
         inert={!open}
         data-tone="dark"
       >
-        <nav className="menu__nav" aria-label="Sections">
+        <nav className="menu__nav" aria-label={t('nav.sectionsLabel')}>
           <ol className="menu__list">
             {SECTIONS.map((section) => (
               <li key={section.id}>
-                <a className="menu__link" href={`#${section.id}`} onClick={onNavigate} data-cursor="Explore">
+                <a className="menu__link" href={`#${section.id}`} onClick={onNavigate} data-cursor={t('cursor.explore')}>
                   <span className="menu__num t-mono">{section.index}</span>
                   <span className="mask">
                     {/* GSAP moves the outer span; CSS hover moves the inner one.
                         A CSS transform transition on a GSAP target corrupts its tween. */}
                     <span className="menu__text">
-                      <span className="menu__label">{section.label}</span>
+                      <span className="menu__label">
+                        <T k={`sections.${section.id}`} />
+                      </span>
                     </span>
                   </span>
                 </a>
@@ -190,8 +208,13 @@ export function Navbar() {
         </nav>
 
         <div className="menu__foot">
-          <p className="t-lead">“Not all those who wander are lost.”</p>
-          <p className="t-label">Middle-earth / 001 — A digital study</p>
+          <p className="t-lead">
+            <T k="menu.quote" />
+          </p>
+          <LanguageSelect variant="inline" />
+          <p className="t-label">
+            <T k="brand.name" /> / 001 — <T k="menu.study" />
+          </p>
         </div>
       </div>
     </>

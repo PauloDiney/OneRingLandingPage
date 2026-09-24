@@ -18,6 +18,14 @@ ScrollTrigger.config({
 /** The house curve: a long, soft landing. Used for nearly every reveal. */
 export const EASE_OUT = 'expo.out';
 
+/**
+ * One-shot reveals: play on the way in, never reverse. Deliberately not
+ * `once: true` — a `once` trigger kills itself, and when that happens inside
+ * another trigger's refresh (loading mid-page while fonts re-split text),
+ * ScrollTrigger walks past the end of its own list and throws.
+ */
+export const PLAY_ONCE = 'play none none none';
+
 // Dev-only handle for auditing from the console, e.g. `ScrollTrigger.getAll()`.
 // `import.meta.env.DEV` is statically false in production, so this is stripped.
 if (import.meta.env.DEV) {
