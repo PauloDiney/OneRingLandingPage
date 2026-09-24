@@ -1,0 +1,284 @@
+/* ==========================================================================
+   The Journey — the first light surface. It is pulled up by one screen so it
+   rises over the film's final frame instead of following it.
+   ========================================================================== */
+
+.journey {
+  --col: calc((100% - 11 * var(--gutter)) / 12);
+  --title: clamp(4.75rem, 24.5vw, 30rem);
+  --title-gap: clamp(3rem, 10svh, 8rem);
+
+  position: relative;
+  z-index: 2;
+  margin-top: -100svh;
+  /* Overlaps Regions by a pixel so no sub-pixel seam shows between the papers. */
+  margin-bottom: -1px;
+  padding: calc(var(--nav-h) + 7svh) 0 clamp(7rem, 16svh, 12rem);
+  background: var(--c-paper);
+  color: var(--c-paper-ink);
+  overflow: clip;
+}
+
+.journey ::selection {
+  background: var(--c-paper-ink);
+  color: var(--c-paper);
+}
+
+/* ---- Head: small text / giant title / information ------------------------ */
+
+.journey__head {
+  align-items: start;
+  will-change: transform;
+}
+
+.journey__aside {
+  grid-column: 1 / span 3;
+  grid-row: 1;
+  display: grid;
+  gap: 1rem;
+}
+
+.journey__aside-note {
+  max-width: 26ch;
+  font-size: var(--fs-small);
+  line-height: 1.5;
+  color: var(--c-paper-muted);
+}
+
+.journey__era {
+  grid-column: 9 / -1;
+  grid-row: 1;
+  justify-self: end;
+  color: var(--c-paper-muted);
+}
+
+.journey__title {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  margin-top: var(--title-gap);
+  font-size: var(--title);
+  line-height: 0.8;
+}
+
+/* Each word is its own mask. The bottom padding leaves room for the J's
+   descender, and the negative margin gives the space back to the layout. */
+.journey__word {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.11em;
+  white-space: nowrap;
+}
+
+.journey__word--the {
+  /* Indented by two columns: the grid is felt, not drawn. */
+  margin-left: calc(var(--col) * 2 + var(--gutter) * 2);
+}
+
+.journey__lead {
+  grid-column: 9 / -1;
+  grid-row: 2;
+  align-self: start;
+  margin-top: calc(var(--title-gap) + var(--title) * 0.1);
+  max-width: 12ch;
+  font-size: clamp(1.5rem, 2.6vw, 2.9rem);
+}
+
+/* ---- Body ------------------------------------------------------------------ */
+
+.journey__body {
+  margin-top: clamp(4rem, 12svh, 9rem);
+  align-items: start;
+}
+
+.journey__fig {
+  grid-column: 1 / span 3;
+  color: var(--c-paper-muted);
+}
+
+.journey__text {
+  grid-column: 7 / span 5;
+  max-width: 34ch;
+  font-size: clamp(1.1rem, 1.45vw, 1.55rem);
+  line-height: 1.42;
+  letter-spacing: -0.005em;
+}
+
+/* ---- Figures ---------------------------------------------------------------- */
+
+.journey__stats {
+  position: relative;
+  margin-top: clamp(5rem, 16svh, 11rem);
+  row-gap: 3rem;
+}
+
+.journey__rule {
+  grid-column: 1 / -1;
+  display: block;
+  height: 1px;
+  margin-bottom: 1.75rem;
+  background: var(--line-paper);
+}
+
+.stat {
+  grid-column: span 3;
+  display: grid;
+  align-content: start;
+  gap: 0.9rem;
+}
+
+.stat__num {
+  font-size: clamp(3.5rem, 8.5vw, 9.5rem);
+}
+
+.stat__num .mask > span {
+  display: inline-block;
+}
+
+.stat__label {
+  margin-top: 0.4rem;
+}
+
+.stat__note {
+  font-size: var(--fs-small);
+  color: var(--c-paper-muted);
+}
+
+/* ---- Route ------------------------------------------------------------------ */
+
+.route {
+  position: relative;
+  margin: clamp(6rem, 18svh, 12rem) var(--margin) 0;
+  padding-bottom: 4.5rem;
+}
+
+.route__line {
+  position: relative;
+  height: 1px;
+  background: var(--line-paper);
+}
+
+.route__progress {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: var(--c-paper-ink);
+  transform-origin: left center;
+}
+
+.route__marker {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  display: block;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 1.5px solid var(--c-gold);
+  border-radius: 50%;
+  background: var(--c-paper);
+  translate: -50% -50%;
+}
+
+.route__stops {
+  position: absolute;
+  inset: 0 0 auto;
+}
+
+.route__stop {
+  --stop-on: 1;
+
+  position: absolute;
+  top: 0;
+  display: grid;
+  gap: 0.35rem;
+  padding-top: 1.4rem;
+  translate: -50% 0;
+  text-align: center;
+  opacity: calc(0.35 + var(--stop-on) * 0.65);
+}
+
+.route__stop:nth-child(1) { left: 0; translate: 0 0; text-align: left; }
+.route__stop:nth-child(2) { left: 25%; }
+.route__stop:nth-child(3) { left: 50%; }
+.route__stop:nth-child(4) { left: 75%; }
+.route__stop:nth-child(5) { left: 100%; translate: -100% 0; text-align: right; }
+
+.route__tick {
+  position: absolute;
+  top: -0.3rem;
+  left: 50%;
+  width: 1px;
+  height: 0.6rem;
+  background: var(--c-paper-ink);
+}
+
+.route__stop:nth-child(1) .route__tick { left: 0; }
+.route__stop:nth-child(5) .route__tick { left: auto; right: 0; }
+
+.route__name {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.5vw, 1.6rem);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.route__date {
+  color: var(--c-paper-muted);
+}
+
+/* ---- Small screens ---------------------------------------------------------- */
+
+@media (max-width: 899px) {
+  .journey__aside {
+    grid-column: 1 / span 8;
+  }
+
+  .journey__era {
+    grid-column: 9 / -1;
+  }
+
+  .journey__aside-note {
+    display: none;
+  }
+
+  .journey {
+    --title: clamp(3.5rem, 22vw, 8rem);
+  }
+
+  .journey__word--the {
+    margin-left: 0;
+  }
+
+  .journey__lead {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-top: 2rem;
+  }
+
+  .journey__fig {
+    grid-column: 1 / -1;
+    margin-bottom: 1.25rem;
+  }
+
+  .journey__text {
+    grid-column: 1 / -1;
+  }
+
+  .stat {
+    grid-column: span 6;
+  }
+
+  .route__date {
+    display: none;
+  }
+
+  .route__name {
+    font-size: 0.8rem;
+  }
+
+  .route__stop:nth-child(2),
+  .route__stop:nth-child(4) {
+    padding-top: 3rem;
+  }
+}

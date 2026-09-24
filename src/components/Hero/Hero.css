@@ -1,0 +1,169 @@
+.hero {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: var(--nav-h) auto 1fr auto;
+  column-gap: var(--gutter);
+  padding: 0 var(--margin) calc(var(--margin) + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+
+/* Keeps the title legible over the busiest part of the map without
+   announcing itself as an overlay. */
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 5, 5, 0.78) 0%, rgba(5, 5, 5, 0.42) 34%, rgba(5, 5, 5, 0) 62%),
+    linear-gradient(0deg, rgba(5, 5, 5, 0.6) 0%, rgba(5, 5, 5, 0) 30%);
+}
+
+.hero__index {
+  position: relative;
+  grid-column: 1 / span 6;
+  grid-row: 2;
+  display: flex;
+  gap: 0.9em;
+  padding-top: clamp(0.75rem, 3svh, 2rem);
+  color: var(--c-ash);
+}
+
+.hero__index > span {
+  display: inline-block;
+}
+
+.hero__slash {
+  color: var(--c-gold);
+}
+
+/* ---- Title ---------------------------------------------------------------- */
+
+.hero__title {
+  position: relative;
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: center;
+  /* Bound by whichever runs out first: height or width. */
+  font-size: clamp(4.5rem, min(27svh, 15.5vw), 21rem);
+  color: var(--c-bone);
+}
+
+.hero__row {
+  display: block;
+  will-change: transform, opacity;
+}
+
+.hero__word {
+  white-space: nowrap;
+}
+
+.hero__row--the {
+  font-size: 0.34em;
+  line-height: 1;
+  margin-bottom: 0.1em;
+  padding-left: 0.12em;
+  color: var(--c-ash);
+}
+
+.hero__row--ring {
+  padding-left: 0.92em;
+}
+
+/* ---- Bottom corners -------------------------------------------------------- */
+
+.hero__caption {
+  position: relative;
+  grid-column: 1 / span 5;
+  grid-row: 4;
+  align-self: end;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.hero__lead {
+  color: var(--c-bone);
+}
+
+.hero__tech {
+  color: var(--c-stone);
+}
+
+.hero__cue {
+  position: relative;
+  grid-column: 8 / -1;
+  grid-row: 4;
+  justify-self: end;
+  align-self: end;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.1rem;
+  color: var(--c-ash);
+}
+
+.hero__cue-track {
+  position: relative;
+  width: 1px;
+  height: clamp(3.5rem, 9svh, 5.5rem);
+  background: var(--line-dark);
+  overflow: hidden;
+}
+
+.hero__cue-line {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.hero__cue-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--c-bone);
+  transform-origin: top;
+  animation: cue 2.6s var(--ease-in-out) infinite;
+}
+
+@keyframes cue {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+@media (max-width: 899px) {
+  .hero__title {
+    font-size: clamp(4.25rem, 27vw, 9rem);
+    align-self: end;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero__scrim {
+    background:
+      linear-gradient(0deg, rgba(5, 5, 5, 0.85) 0%, rgba(5, 5, 5, 0.3) 55%, rgba(5, 5, 5, 0.2) 100%);
+  }
+
+  .hero__caption {
+    grid-column: 1 / span 9;
+  }
+
+  .hero__tech {
+    display: none;
+  }
+
+  .hero__cue {
+    grid-column: 10 / -1;
+  }
+
+  .hero__cue > .t-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__cue-line::after {
+    animation: none;
+    transform: scaleY(1);
+  }
+}

@@ -1,0 +1,305 @@
+/* ==========================================================================
+   Film — a tall scroll range with a sticky stage
+   ========================================================================== */
+
+.film {
+  position: relative;
+  /* 4 screens of film + the stage itself + 1 screen of curtain. */
+  height: 600svh;
+  background: var(--c-black);
+}
+
+.film__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--c-black);
+}
+
+.film__media,
+.film__intro {
+  position: absolute;
+  inset: 0;
+}
+
+.film__media {
+  transform-origin: 50% 35%;
+  will-change: transform;
+}
+
+.film__intro {
+  will-change: transform;
+}
+
+.film__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--c-black);
+}
+
+.film__media > div:not(.film__intro) {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Lifted by the scroll as the ring starts to fall. */
+.film__shade {
+  background: var(--c-black);
+  opacity: 0.5;
+}
+
+/* Heat, tracking the red cast already present in the last seconds of footage. */
+.film__ember {
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 55% 65% at 92% 70%, rgba(196, 80, 42, 0.35), transparent 70%),
+    linear-gradient(0deg, rgba(60, 14, 4, 0.45), transparent 50%);
+  mix-blend-mode: soft-light;
+}
+
+.film__vignette {
+  background:
+    radial-gradient(ellipse 115% 95% at 50% 42%, transparent 50%, rgba(5, 5, 5, 0.7) 100%),
+    linear-gradient(180deg, rgba(5, 5, 5, 0.7) 0%, rgba(5, 5, 5, 0) 22%),
+    linear-gradient(0deg, rgba(5, 5, 5, 0.85) 0%, rgba(5, 5, 5, 0.45) 24%, rgba(5, 5, 5, 0) 48%);
+}
+
+.film__dim {
+  background: var(--c-black);
+  opacity: 0;
+}
+
+.film__intro-shade {
+  background: var(--c-black);
+}
+
+/* ==========================================================================
+   Overlay — chapters, finale and the discreet technical line
+   ========================================================================== */
+
+.film__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.chapter {
+  position: absolute;
+  bottom: calc(var(--margin) + 5svh);
+  display: grid;
+  gap: 1.1rem;
+  max-width: min(48rem, 62vw);
+  visibility: hidden;
+  text-shadow: 0 0 2.5rem rgba(5, 5, 5, 0.45);
+}
+
+.chapter--left {
+  left: var(--margin);
+}
+
+.chapter--right {
+  right: calc(var(--margin) + 3.5rem);
+  justify-items: end;
+  text-align: right;
+}
+
+.chapter__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  color: var(--c-bone);
+}
+
+.chapter__index {
+  color: var(--c-gold);
+}
+
+.chapter__rule {
+  display: block;
+  width: 3.5rem;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+  transform-origin: left center;
+}
+
+.chapter--right .chapter__rule {
+  transform-origin: right center;
+}
+
+.chapter__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--c-bone);
+  margin-block: 0.1em 0.05em;
+}
+
+.chapter__char {
+  will-change: transform;
+}
+
+.chapter__line {
+  color: var(--c-bone);
+}
+
+.chapter__date {
+  color: var(--c-ash);
+}
+
+/* ---- Finale --------------------------------------------------------------- */
+
+.finale {
+  position: absolute;
+  left: var(--margin);
+  right: calc(var(--margin) + 3.5rem);
+  bottom: calc(var(--margin) + 4svh);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  visibility: hidden;
+  text-shadow: 0 0 2.5rem rgba(5, 5, 5, 0.5);
+}
+
+.finale__quote {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-style: italic;
+  line-height: 0.98;
+  max-width: 11ch;
+  color: var(--c-bone);
+}
+
+.finale__source {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: end;
+  text-align: right;
+  color: var(--c-ash);
+}
+
+.finale__source .t-italic {
+  font-size: clamp(1.25rem, 1.8vw, 1.75rem);
+  color: var(--c-gold);
+}
+
+/* ---- Technical line -------------------------------------------------------- */
+
+.film__meta {
+  position: absolute;
+  top: calc(var(--nav-h) + 0.75rem);
+  left: var(--margin);
+  right: var(--margin);
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--c-ash);
+  opacity: 0;
+}
+
+.film__counter {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+}
+
+.film__counter-mask {
+  display: inline-block;
+  height: 1.4em;
+  overflow: hidden;
+}
+
+.film__counter-track {
+  display: flex;
+  flex-direction: column;
+  color: var(--c-bone);
+}
+
+.film__counter-track > span {
+  display: block;
+  height: 1.4em;
+  line-height: 1.4em;
+}
+
+.film__time {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.film__timecode {
+  color: var(--c-bone);
+  min-width: 8ch;
+}
+
+.film__bar {
+  position: relative;
+  display: block;
+  width: clamp(4rem, 11vw, 10rem);
+  height: 1px;
+  background: var(--line-dark);
+}
+
+.film__bar > span {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: var(--c-bone);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+/* ==========================================================================
+   Small screens: fewer things on screen at once
+   ========================================================================== */
+
+@media (max-width: 899px) {
+  .film {
+    height: 460svh;
+  }
+
+  .chapter,
+  .chapter--right {
+    left: var(--margin);
+    right: var(--margin);
+    bottom: calc(var(--margin) + 2svh + env(safe-area-inset-bottom, 0px));
+    max-width: none;
+    justify-items: start;
+    text-align: left;
+    gap: 0.8rem;
+  }
+
+  .chapter--right .chapter__rule {
+    transform-origin: left center;
+  }
+
+  .chapter__name {
+    font-size: clamp(2.75rem, 14vw, 4.5rem);
+  }
+
+  .chapter__date,
+  .film__time > span:first-child,
+  .film__duration {
+    display: none;
+  }
+
+  .finale {
+    right: var(--margin);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+
+  .finale__source {
+    justify-items: start;
+    text-align: left;
+  }
+}

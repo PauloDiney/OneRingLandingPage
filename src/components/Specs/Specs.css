@@ -1,0 +1,126 @@
+.specs {
+  position: relative;
+  z-index: 2;
+  padding: clamp(8rem, 22svh, 15rem) 0 clamp(8rem, 20svh, 14rem);
+  background: var(--c-black);
+  color: var(--c-bone);
+}
+
+.specs__head {
+  align-items: end;
+  margin-bottom: clamp(4rem, 12svh, 8rem);
+}
+
+.specs__label {
+  grid-column: 1 / span 3;
+  color: var(--c-ash);
+}
+
+.specs__title {
+  grid-column: 5 / -1;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+
+.specs__title em {
+  font-style: italic;
+  color: var(--c-ash);
+}
+
+/* ---- Rows ------------------------------------------------------------------- */
+
+.spec {
+  position: relative;
+  align-items: start;
+  padding-block: clamp(2rem, 5svh, 3.5rem) clamp(3.5rem, 9svh, 6rem);
+}
+
+.spec__rule {
+  position: absolute;
+  top: 0;
+  left: var(--margin);
+  right: var(--margin);
+  height: 1px;
+  background: var(--line-dark);
+}
+
+.spec__num-mask {
+  grid-column: 1 / span 2;
+}
+
+.spec__num {
+  font-size: clamp(3rem, 7vw, 7.5rem);
+  color: var(--c-stone);
+  transition: color 0.8s var(--ease-out);
+}
+
+.spec__label-mask {
+  grid-column: 3 / span 2;
+  padding-top: 0.6rem;
+}
+
+.spec__label {
+  color: var(--c-ash);
+}
+
+.spec__value {
+  grid-column: 5 / span 5;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  transition: transform 0.9s var(--ease-out);
+}
+
+.spec__note {
+  grid-column: 10 / -1;
+  padding-top: 0.6rem;
+  max-width: 30ch;
+  font-size: var(--fs-small);
+  line-height: 1.6;
+  color: var(--c-ash);
+}
+
+.spec:hover .spec__num {
+  color: var(--c-gold);
+}
+
+.spec:hover .spec__value {
+  transform: translateX(0.12em);
+}
+
+@media (max-width: 899px) {
+  .specs__label,
+  .specs__title {
+    grid-column: 1 / -1;
+  }
+
+  .specs__title {
+    margin-top: 1.5rem;
+  }
+
+  .spec {
+    row-gap: 0.9rem;
+  }
+
+  .spec__num-mask {
+    grid-column: 1 / span 3;
+  }
+
+  .spec__label-mask {
+    grid-column: 4 / -1;
+    padding-top: 0.2rem;
+  }
+
+  .spec__value,
+  .spec__note {
+    grid-column: 1 / -1;
+  }
+
+  .spec__value {
+    font-size: clamp(2.5rem, 12vw, 4rem);
+  }
+}

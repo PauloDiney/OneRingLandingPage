@@ -1,0 +1,155 @@
+.mordor {
+  position: relative;
+  z-index: 2;
+  height: 320svh;
+  background: var(--c-black);
+  color: var(--c-bone);
+}
+
+.mordor__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* ---- Picture ----------------------------------------------------------------- */
+
+.mordor__media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--c-ink-1);
+}
+
+.mordor__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 55% 50%;
+  filter: brightness(0.52) contrast(1.18) saturate(0.7);
+  will-change: transform;
+}
+
+.mordor__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 80% at 55% 45%, rgba(5, 5, 5, 0) 30%, rgba(5, 5, 5, 0.8) 100%),
+    linear-gradient(180deg, rgba(5, 5, 5, 0.75) 0%, rgba(5, 5, 5, 0) 30%, rgba(5, 5, 5, 0) 55%, rgba(5, 5, 5, 0.92) 100%);
+}
+
+/* ---- Words ------------------------------------------------------------------- */
+
+.mordor__label,
+.mordor__coords {
+  position: absolute;
+  top: calc(var(--nav-h) + 3svh);
+  color: var(--c-ash);
+}
+
+.mordor__label {
+  left: var(--margin);
+}
+
+.mordor__coords {
+  right: calc(var(--margin) + 3.5rem);
+}
+
+/* A centring flex box lets the word overflow both edges equally. */
+.mordor__title {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 14svh;
+  pointer-events: none;
+}
+
+/* Slightly wider than the screen, on purpose. */
+.mordor__word {
+  flex: none;
+  font-family: var(--font-display);
+  /* Measured: the word is ~3.2em wide, so 33vw lands at ~106% of the screen. */
+  font-size: 33vw;
+  font-weight: 400;
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--c-bone);
+  overflow: clip;
+  padding-bottom: 0.04em;
+}
+
+/* The only colour in the section: heat, drawn as a hairline. */
+.mordor__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 64%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(196, 80, 42, 0) 0%,
+    rgba(196, 80, 42, 0.75) 22%,
+    #e0703f 50%,
+    rgba(196, 80, 42, 0.75) 78%,
+    rgba(196, 80, 42, 0) 100%
+  );
+  box-shadow: 0 0 14px rgba(196, 80, 42, 0.45);
+  transform-origin: 50% 50%;
+  z-index: 3;
+}
+
+.mordor__copy {
+  position: absolute;
+  left: var(--margin);
+  bottom: calc(var(--margin) + 4svh);
+  display: grid;
+  gap: 1rem;
+  max-width: 30rem;
+}
+
+.mordor__copy .t-body {
+  color: var(--c-ash);
+}
+
+.mordor__black {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: var(--c-black);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mordor__final {
+  position: absolute;
+  left: var(--margin);
+  right: var(--margin);
+  top: calc(64% + 2.5rem);
+  z-index: 4;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-style: italic;
+  white-space: nowrap;
+  color: var(--c-bone);
+  opacity: 0;
+}
+
+@media (max-width: 899px) {
+  .mordor {
+    height: 280svh;
+  }
+
+  .mordor__title {
+    padding-bottom: 20svh;
+  }
+
+  .mordor__coords {
+    display: none;
+  }
+}

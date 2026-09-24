@@ -1,0 +1,15 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vite
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Source master for the encoded videos in public/videos (6 MB, regenerate with the
+# ffmpeg commands in README.md). Remove this line if you want it versioned.
+TheOneRing.mp4

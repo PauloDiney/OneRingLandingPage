@@ -1,0 +1,224 @@
+/* ==========================================================================
+   Tokens
+   ========================================================================== */
+
+:root {
+  /* Surfaces */
+  --c-black: #050505;
+  --c-ink-1: #0a0a0a;
+  --c-ink-2: #111111;
+  --c-ink-3: #1a1a1a;
+  --c-paper: #f2f0ea;
+
+  /* Type on dark */
+  --c-bone: #e8e7e3;
+  --c-ash: #a7a6a1;
+  --c-stone: #777773;
+
+  /* Type on paper */
+  --c-paper-ink: #0e0e0d;
+  --c-paper-muted: #5a5954;
+
+  /* Accents — used sparingly, never as a surface */
+  --c-gold: #b89b5e;
+  --c-ember: #c4502a;
+  --c-cool: #8e969b;
+
+  --line-dark: rgba(232, 231, 227, 0.14);
+  --line-paper: rgba(14, 14, 13, 0.16);
+
+  /* Layout */
+  --margin: clamp(1rem, 3.2vw, 3.5rem);
+  --gutter: clamp(0.75rem, 1.6vw, 1.75rem);
+  --nav-h: clamp(4rem, 7vw, 5.5rem);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  color-scheme: dark;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--c-black);
+  color: var(--c-bone);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Anchor jumps are animated by GSAP; native smooth scrolling would fight it. */
+  scroll-behavior: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-ink-3) var(--c-black);
+}
+
+body {
+  min-height: 100svh;
+  background: var(--c-black);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+/* Headings take their look from classes. Browser-default bold would make the
+   single-weight display serif synthesise a smeared faux bold. */
+h1,
+h2,
+h3,
+h4 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+img,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+::selection {
+  background: var(--c-gold);
+  color: var(--c-black);
+}
+
+:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
+}
+
+/* The custom cursor replaces the system one only while it is mounted. */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Wrapper that hides text travelling in from below the baseline. The small
+   padding keeps descenders and italic overhangs from being clipped. */
+.mask {
+  display: block;
+  overflow: clip;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+
+.mask > * {
+  display: block;
+}
+
+/* Lines and words produced by SplitText's `mask` option. */
+.split-line-mask,
+.split-word-mask {
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  padding-inline: var(--margin);
+}
+
+.skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  padding: 0.75rem 1.1rem;
+  background: var(--c-bone);
+  color: var(--c-black);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transform: translateY(-200%);
+  transition: transform 0.4s var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Film grain — one fixed layer over everything, nudged in steps so it reads
+   as grain rather than as a texture sliding across the page.
+   ========================================================================== */
+
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 900;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(6) infinite;
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  17% { transform: translate(-3%, 2%); }
+  33% { transform: translate(2%, -4%); }
+  50% { transform: translate(-4%, -1%); }
+  67% { transform: translate(3%, 3%); }
+  83% { transform: translate(-1%, 4%); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain {
+    animation: none;
+  }
+}
