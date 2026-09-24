@@ -20,6 +20,9 @@ export const NAV_LINKS = [
   { href: '#mordor', section: 'mordor' },
 ] as const;
 
+/** The interactive atlas: a page of its own (map/index.html). Label: `nav.map`. */
+export const MAP_LINK = { href: '/map/', index: '06' } as const;
+
 /** Labels, values and notes: `specs.items.<id>`. */
 export const SPECS = [
   { id: 'object', index: '01' },

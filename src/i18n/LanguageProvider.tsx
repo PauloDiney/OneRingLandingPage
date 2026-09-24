@@ -100,7 +100,13 @@ const initialLanguage = (): LanguageId => {
   return id;
 };
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
+type ProviderProps = {
+  children: ReactNode;
+  /** Which page's <title> and description to keep in the current language. */
+  page?: 'home' | 'map';
+};
+
+export function LanguageProvider({ children, page = 'home' }: ProviderProps) {
   const [language, setLanguageState] = useState<LanguageId>(initialLanguage);
   const [fonts, setFonts] = useState<Record<FontSet, FontStatus>>({ elvish: 'idle', dwarvish: 'idle', inscription: 'idle' });
 
@@ -237,8 +243,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     root.lang = meta.htmlLang;
     root.dataset.language = language;
-    document.title = messages.meta.title;
-    document.querySelector('meta[name="description"]')?.setAttribute('content', messages.meta.description);
+    const pageMeta = page === 'map' ? messages.map.meta : messages.meta;
+    document.title = pageMeta.title;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', pageMeta.description);
 
     const done = pending.current;
     if (!done) return;
@@ -272,7 +279,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const next = queued.current;
     queued.current = null;
     if (next && next !== language) run(next);
-  }, [language, meta, messages, run, startDip]);
+  }, [language, meta, messages, page, run, startDip]);
 
   const value = useMemo<LanguageContextValue>(
     () => ({ language, meta, messages, t, script, inscriptionReady, setLanguage }),

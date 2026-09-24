@@ -23,7 +23,17 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     document.fonts?.ready.then(() => {
-      if (!cancelled) ScrollTrigger.refresh();
+      if (cancelled) return;
+      ScrollTrigger.refresh();
+      // Arriving from the atlas with a section in the URL (/#journey): the
+      // browser jumped there before the pins existed. Re-seat it on the
+      // settled layout.
+      const target = document.getElementById(window.location.hash.slice(1));
+      if (target) {
+        const box = target.parentElement?.classList.contains('pin-spacer') ? target.parentElement : target;
+        window.scrollTo(0, box.getBoundingClientRect().top + window.scrollY);
+        ScrollTrigger.update();
+      }
     });
     return () => {
       cancelled = true;

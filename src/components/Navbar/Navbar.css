@@ -97,7 +97,8 @@ html.menu-open .nav {
 }
 
 .nav__link:hover,
-.nav__link:focus-visible {
+.nav__link:focus-visible,
+.nav__link[aria-current='page'] {
   color: var(--nav-fg);
 }
 

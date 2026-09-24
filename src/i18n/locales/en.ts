@@ -33,6 +33,7 @@ export const en = {
     close: 'Close',
     siteMenu: 'Site menu',
     sectionsLabel: 'Sections',
+    map: 'Map',
   },
 
   menu: {
@@ -224,5 +225,66 @@ export const en = {
       'React, GSAP and a single scroll-driven video. Set in Instrument Serif and Geist; scripts in Tengwar Annatar (Johan Winge) and Moria (Neale Davidson).',
     backTo: 'Back to the ',
     top: 'Top',
+  },
+  map: {
+    meta: {
+      title: 'Interactive Atlas — Middle-earth',
+      description: 'A 3D atlas of Middle-earth: fly from the Shire to Mordor across the terrain itself.',
+    },
+    skip: 'Skip to the list of regions',
+    kicker: 'Interactive atlas',
+    titleA: 'Explore',
+    titleB: 'the world',
+    lead: 'Move through the lands, follow the paths and discover the places that shaped the journey.',
+    hintDrag: 'Drag to explore',
+    hintZoom: 'Scroll to zoom',
+    hintPinch: 'Pinch to zoom',
+    cursorDrag: 'Drag',
+    modesLabel: 'Atlas modes',
+    modes: {
+      explore: 'Explore',
+      journey: 'Journey',
+      discover: 'Discover',
+    },
+    soon: 'Soon',
+    loading: 'Loading terrain',
+    error: 'The terrain could not be loaded.',
+    retry: 'Try again',
+    regionsLabel: 'Regions',
+    flyTo: 'Fly to {name}',
+    back: 'Back to map',
+    exploreRegion: 'Explore region',
+    regions: {
+      shire: {
+        name: 'The Shire',
+        subtitle: 'Where the road begins',
+        description: 'Soft hills, slow rivers and round green doors: the smallest country on the map, and the one the whole story turns on.',
+      },
+      rivendell: {
+        name: 'Rivendell',
+        subtitle: 'The Last Homely House',
+        description: 'A hidden valley at the feet of the Misty Mountains, where the Fellowship was formed.',
+      },
+      moria: {
+        name: 'Moria',
+        subtitle: 'Khazad-dûm',
+        description: 'The great dwarf-realm beneath the mountains, dark and silent since the Balrog woke.',
+      },
+      rohan: {
+        name: 'Rohan',
+        subtitle: 'The Riddermark',
+        description: 'Open plains stretching beneath the White Mountains.',
+      },
+      gondor: {
+        name: 'Gondor',
+        subtitle: 'The South-kingdom',
+        description: 'Cities of stone along the Anduin, keeping watch over the east.',
+      },
+      mordor: {
+        name: 'Mordor',
+        subtitle: 'The Land of Shadow',
+        description: 'Plains of ash ringed by mountains, with Mount Doom burning at their heart.',
+      },
+    },
   },
 };

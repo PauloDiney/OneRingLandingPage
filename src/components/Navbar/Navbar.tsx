@@ -5,12 +5,22 @@ import { scrollToHash } from '../../lib/scroll';
 import { useMagnetic } from '../../hooks/useMagnetic';
 import { useSurfaceTone } from '../../hooks/useSurfaceTone';
 import { useLanguage } from '../../hooks/useLanguage';
-import { NAV_LINKS, SECTIONS } from '../../data/sections';
+import { MAP_LINK, NAV_LINKS, SECTIONS } from '../../data/sections';
 import { T } from '../../i18n';
 import { LanguageSelect } from '../LanguageSelect/LanguageSelect';
 import './Navbar.css';
 
-export function Navbar() {
+type Props = {
+  /**
+   * Which page the bar sits on. On the atlas, section links lead back to the
+   * home page (`/#journey`) instead of scrolling, and MAP is the current page.
+   */
+  page?: 'home' | 'map';
+};
+
+export function Navbar({ page = 'home' }: Props) {
+  const onHome = page === 'home';
+  const sectionHref = (hash: string) => (onHome ? hash : `/${hash}`);
   const headerRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -130,7 +140,7 @@ export function Navbar() {
   return (
     <>
       <header className="nav" ref={headerRef} data-tone="dark">
-        <a className="nav__logo t-label" href="#top" onClick={onNavigate} data-nav-item data-cursor={t('cursor.top')}>
+        <a className="nav__logo t-label" href={onHome ? '#top' : '/'} onClick={onNavigate} data-nav-item data-cursor={t('cursor.top')}>
           <span className="nav__mark" aria-hidden="true" />
           <span>
             <T k="brand.name" />
@@ -142,7 +152,7 @@ export function Navbar() {
           <ul>
             {NAV_LINKS.map((link) => (
               <li key={link.href} data-nav-item>
-                <a className="nav__link t-label" href={link.href} onClick={onNavigate} data-cursor={t('cursor.explore')}>
+                <a className="nav__link t-label" href={sectionHref(link.href)} onClick={onNavigate} data-cursor={t('cursor.explore')}>
                   {/* The twin that rolls up on hover reads in plain letters in
                       a script mode (Navbar.css): hovering decodes the label. */}
                   <span className="nav__roll" data-text={t(`sections.${link.section}`)}>
@@ -153,6 +163,20 @@ export function Navbar() {
                 </a>
               </li>
             ))}
+            <li data-nav-item>
+              <a
+                className="nav__link t-label"
+                href={MAP_LINK.href}
+                aria-current={onHome ? undefined : 'page'}
+                data-cursor={t('cursor.explore')}
+              >
+                <span className="nav__roll" data-text={t('nav.map')}>
+                  <span>
+                    <T k="nav.map" />
+                  </span>
+                </span>
+              </a>
+            </li>
           </ul>
         </nav>
 
@@ -190,7 +214,7 @@ export function Navbar() {
           <ol className="menu__list">
             {SECTIONS.map((section) => (
               <li key={section.id}>
-                <a className="menu__link" href={`#${section.id}`} onClick={onNavigate} data-cursor={t('cursor.explore')}>
+                <a className="menu__link" href={sectionHref(`#${section.id}`)} onClick={onNavigate} data-cursor={t('cursor.explore')}>
                   <span className="menu__num t-mono">{section.index}</span>
                   <span className="mask">
                     {/* GSAP moves the outer span; CSS hover moves the inner one.
@@ -204,6 +228,23 @@ export function Navbar() {
                 </a>
               </li>
             ))}
+            <li>
+              <a
+                className="menu__link"
+                href={MAP_LINK.href}
+                aria-current={onHome ? undefined : 'page'}
+                data-cursor={t('cursor.explore')}
+              >
+                <span className="menu__num t-mono">{MAP_LINK.index}</span>
+                <span className="mask">
+                  <span className="menu__text">
+                    <span className="menu__label">
+                      <T k="nav.map" />
+                    </span>
+                  </span>
+                </span>
+              </a>
+            </li>
           </ol>
         </nav>
 

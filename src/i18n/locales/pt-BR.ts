@@ -36,6 +36,7 @@ export const ptBR: Messages = {
     close: 'Fechar',
     siteMenu: 'Menu do site',
     sectionsLabel: 'Seções',
+    map: 'Mapa',
   },
 
   menu: {
@@ -232,5 +233,66 @@ export const ptBR: Messages = {
       'React, GSAP e um único vídeo guiado pela rolagem. Composto em Instrument Serif e Geist; escritas em Tengwar Annatar (Johan Winge) e Moria (Neale Davidson).',
     backTo: 'Voltar ao ',
     top: 'Topo',
+  },
+  map: {
+    meta: {
+      title: 'Atlas Interativo — Terra-média',
+      description: 'Um atlas 3D da Terra-média: voe do Condado a Mordor sobre o próprio relevo.',
+    },
+    skip: 'Pular para a lista de regiões',
+    kicker: 'Atlas interativo',
+    titleA: 'Explore',
+    titleB: 'o mundo',
+    lead: 'Percorra as terras, siga os caminhos e descubra os lugares que moldaram a jornada.',
+    hintDrag: 'Arraste para explorar',
+    hintZoom: 'Role para aproximar',
+    hintPinch: 'Use dois dedos para aproximar',
+    cursorDrag: 'Arrastar',
+    modesLabel: 'Modos do atlas',
+    modes: {
+      explore: 'Explorar',
+      journey: 'Jornada',
+      discover: 'Descobrir',
+    },
+    soon: 'Em breve',
+    loading: 'Carregando o relevo',
+    error: 'Não foi possível carregar o relevo.',
+    retry: 'Tentar novamente',
+    regionsLabel: 'Regiões',
+    flyTo: 'Voar até {name}',
+    back: 'Voltar ao mapa',
+    exploreRegion: 'Explorar região',
+    regions: {
+      shire: {
+        name: 'O Condado',
+        subtitle: 'Onde a estrada começa',
+        description: 'Colinas suaves, rios lentos e portas redondas e verdes: o menor país do mapa, e aquele de que toda a história depende.',
+      },
+      rivendell: {
+        name: 'Valfenda',
+        subtitle: 'A Última Casa Amiga',
+        description: 'Um vale oculto aos pés das Montanhas Sombrias, onde a Sociedade foi formada.',
+      },
+      moria: {
+        name: 'Moria',
+        subtitle: 'Khazad-dûm',
+        description: 'O grande reino dos Anões sob as montanhas, escuro e silencioso desde que o Balrog despertou.',
+      },
+      rohan: {
+        name: 'Rohan',
+        subtitle: 'A Marca dos Cavaleiros',
+        description: 'Planícies abertas que se estendem sob as Montanhas Brancas.',
+      },
+      gondor: {
+        name: 'Gondor',
+        subtitle: 'O Reino do Sul',
+        description: 'Cidades de pedra ao longo do Anduin, vigiando o leste.',
+      },
+      mordor: {
+        name: 'Mordor',
+        subtitle: 'A Terra da Sombra',
+        description: 'Planícies de cinzas cercadas por montanhas, com a Montanha da Perdição ardendo em seu centro.',
+      },
+    },
   },
 };
