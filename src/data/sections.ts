@@ -12,11 +12,17 @@ export const SECTIONS = [
   { id: 'mordor', index: '05' },
 ] as const;
 
-/** Primary navigation, in the order the brief asks for. */
+/** Regions of Middle-earth: a page of its own (regions/index.html). */
+export const REGIONS_LINK = { href: '/regions/' } as const;
+
+/**
+ * Primary navigation, in the order the brief asks for. Entries with a `page`
+ * lead to a page of their own; the rest are sections of the home page.
+ */
 export const NAV_LINKS = [
   { href: '#ring', section: 'ring' },
   { href: '#journey', section: 'journey' },
-  { href: '#regions', section: 'regions' },
+  { href: REGIONS_LINK.href, section: 'regions', page: 'regions' },
   { href: '#mordor', section: 'mordor' },
 ] as const;
 

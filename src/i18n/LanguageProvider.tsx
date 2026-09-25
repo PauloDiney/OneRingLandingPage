@@ -103,7 +103,7 @@ const initialLanguage = (): LanguageId => {
 type ProviderProps = {
   children: ReactNode;
   /** Which page's <title> and description to keep in the current language. */
-  page?: 'home' | 'map';
+  page?: 'home' | 'map' | 'regions';
 };
 
 export function LanguageProvider({ children, page = 'home' }: ProviderProps) {
@@ -243,7 +243,7 @@ export function LanguageProvider({ children, page = 'home' }: ProviderProps) {
     const root = document.documentElement;
     root.lang = meta.htmlLang;
     root.dataset.language = language;
-    const pageMeta = page === 'map' ? messages.map.meta : messages.meta;
+    const pageMeta = page === 'map' ? messages.map.meta : page === 'regions' ? messages.regionsPage.meta : messages.meta;
     document.title = pageMeta.title;
     document.querySelector('meta[name="description"]')?.setAttribute('content', pageMeta.description);
 

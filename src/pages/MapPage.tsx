@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLanguage } from '../hooks/useLanguage';
 import { matches, MQ } from '../lib/media';
 import { T } from '../i18n';
-import { DEBUG_MAP } from '../data/mapRegions';
+import { DEBUG_MAP, MAP_REGIONS } from '../data/mapRegions';
 import { Navbar } from '../components/Navbar/Navbar';
 import { Cursor } from '../components/Cursor/Cursor';
 import { MiddleEarthMap } from '../components/map/MiddleEarthMap';
@@ -31,6 +31,25 @@ export function MapPage() {
     // The page does not scroll: the wheel belongs to the map.
     document.documentElement.classList.add('is-atlas');
     return () => document.documentElement.classList.remove('is-atlas');
+  }, []);
+
+  // Arriving with a region in the URL (/map/?region=rohan, from the Regions
+  // page): once the land is in and the entrance is over, fly there.
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get('region');
+    const region = MAP_REGIONS.find((r) => r.id === wanted);
+    if (!region) return;
+    let flown = false;
+    const fly = () => {
+      if (flown || mapStore.get().phase !== 'ready') return;
+      flown = true;
+      mapCamera.flyTo(region.id);
+    };
+    const unsubscribe = mapStore.subscribe(fly);
+    fly();
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return (

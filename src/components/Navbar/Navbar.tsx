@@ -5,17 +5,20 @@ import { scrollToHash } from '../../lib/scroll';
 import { useMagnetic } from '../../hooks/useMagnetic';
 import { useSurfaceTone } from '../../hooks/useSurfaceTone';
 import { useLanguage } from '../../hooks/useLanguage';
-import { MAP_LINK, NAV_LINKS, SECTIONS } from '../../data/sections';
+import { MAP_LINK, NAV_LINKS, REGIONS_LINK, SECTIONS } from '../../data/sections';
 import { T } from '../../i18n';
 import { LanguageSelect } from '../LanguageSelect/LanguageSelect';
 import './Navbar.css';
 
+type Page = 'home' | 'map' | 'regions';
+
 type Props = {
   /**
-   * Which page the bar sits on. On the atlas, section links lead back to the
-   * home page (`/#journey`) instead of scrolling, and MAP is the current page.
+   * Which page the bar sits on. Away from home, section links lead back to
+   * the home page (`/#journey`) instead of scrolling, and the entry for the
+   * page itself (MAP, REGIONS) is marked as current.
    */
-  page?: 'home' | 'map';
+  page?: Page;
 };
 
 export function Navbar({ page = 'home' }: Props) {
@@ -152,7 +155,13 @@ export function Navbar({ page = 'home' }: Props) {
           <ul>
             {NAV_LINKS.map((link) => (
               <li key={link.href} data-nav-item>
-                <a className="nav__link t-label" href={sectionHref(link.href)} onClick={onNavigate} data-cursor={t('cursor.explore')}>
+                <a
+                  className="nav__link t-label"
+                  href={'page' in link ? link.href : sectionHref(link.href)}
+                  aria-current={'page' in link && link.page === page ? 'page' : undefined}
+                  onClick={onNavigate}
+                  data-cursor={t('cursor.explore')}
+                >
                   {/* The twin that rolls up on hover reads in plain letters in
                       a script mode (Navbar.css): hovering decodes the label. */}
                   <span className="nav__roll" data-text={t(`sections.${link.section}`)}>
@@ -167,7 +176,7 @@ export function Navbar({ page = 'home' }: Props) {
               <a
                 className="nav__link t-label"
                 href={MAP_LINK.href}
-                aria-current={onHome ? undefined : 'page'}
+                aria-current={page === 'map' ? 'page' : undefined}
                 data-cursor={t('cursor.explore')}
               >
                 <span className="nav__roll" data-text={t('nav.map')}>
@@ -214,7 +223,13 @@ export function Navbar({ page = 'home' }: Props) {
           <ol className="menu__list">
             {SECTIONS.map((section) => (
               <li key={section.id}>
-                <a className="menu__link" href={sectionHref(`#${section.id}`)} onClick={onNavigate} data-cursor={t('cursor.explore')}>
+                <a
+                  className="menu__link"
+                  href={section.id === 'regions' ? REGIONS_LINK.href : sectionHref(`#${section.id}`)}
+                  aria-current={section.id === 'regions' && page === 'regions' ? 'page' : undefined}
+                  onClick={onNavigate}
+                  data-cursor={t('cursor.explore')}
+                >
                   <span className="menu__num t-mono">{section.index}</span>
                   <span className="mask">
                     {/* GSAP moves the outer span; CSS hover moves the inner one.
@@ -232,7 +247,7 @@ export function Navbar({ page = 'home' }: Props) {
               <a
                 className="menu__link"
                 href={MAP_LINK.href}
-                aria-current={onHome ? undefined : 'page'}
+                aria-current={page === 'map' ? 'page' : undefined}
                 data-cursor={t('cursor.explore')}
               >
                 <span className="menu__num t-mono">{MAP_LINK.index}</span>
